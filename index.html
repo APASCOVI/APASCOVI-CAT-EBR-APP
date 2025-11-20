@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EBR · Fundación APASCOVI (CAT)</title>
+
+<!-- SheetJS para Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+  :root{
+    --pastel-blue:#a3d2ff;
+    --pastel-blue-2:#d5ecff;
+    --pastel-pink:#ffc9de;
+    --pastel-pink-2:#ffe6f0;
+    --ink:#2b2b2b;
+    --ink-soft:#5a5a5a;
+    --accent:#6aa9ff;
+    --ok:#2bb673;
+    --warn:#ffb400;
+    --card:#ffffffcc;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol";
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 800px at -10% -20%, var(--pastel-pink-2), transparent 60%),
+      radial-gradient(1200px 800px at 110% 0%, var(--pastel-blue-2), transparent 60%),
+      linear-gradient(180deg, #ffffff, #ffffff);
+  }
+  header{
+    position:sticky; top:0; z-index:1000;
+    background: linear-gradient(90deg, var(--pastel-pink) 0%, var(--pastel-blue) 100%);
+    color:#173250;
+    padding:14px 16px;
+    display:flex; align-items:center; gap:16px;
+    border-bottom:1px solid #ffffff88;
+    box-shadow: 0 6px 18px #00000014;
+  }
+  header h1{
+    margin:0; font-size: clamp(18px,2.6vw,24px); font-weight:800; letter-spacing:.2px;
+  }
+  header small{opacity:.85; font-weight:600}
+  .brand{display:flex; align-items:center; gap:12px}
+  .brand .logo{
+    height:40px; width:auto; object-fit:contain;
+    border-radius:8px; background:#fff;
+    box-shadow: inset 0 0 0 2px #ffffffaa, 0 2px 6px #0000001a;
+  }
+
+  .dl-wrap{display:flex; gap:8px; margin-left:auto}
+  .btn{
+    all:unset; display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+    padding:10px 14px; border-radius:12px; font-weight:700; border:1px solid #00000018; background:#fff;
+  }
+  .btn:hover{box-shadow:0 4px 16px #00000010}
+  .btn.ok{background:linear-gradient(180deg,#eafff5,#ffffff); border-color:#2bb67344; color:#11623f}
+  .btn.warn{background:linear-gradient(180deg,#fff7e3,#ffffff); border-color:#ffb40044; color:#8b5a00}
+  .btn.pink{background:linear-gradient(180deg,#fff0f7,#ffffff); border-color:#ff87b744; color:#7b2d4b}
+  .btn.blue{background:linear-gradient(180deg,#ecf5ff,#ffffff); border-color:#6aa9ff44; color:#1b4a87}
+  .btn.danger{background:linear-gradient(180deg,#ffecec,#ffffff); border-color:#ff6b6b66; color:#8f1e1e}
+  .s{font-size:12px; padding:6px 10px; border-radius:10px; border:1px solid #00000020; background:#fff; cursor:pointer}
+  .s:hover{background:#f6f6f6}
+
+  .timer-wrap{
+    display:flex; align-items:center; gap:8px;
+    background:#ffffff99; border:1px solid #ffffff; padding:6px 10px; border-radius:14px;
+    backdrop-filter: blur(4px); margin-left:auto;
+  }
+  .timer{
+    font-variant-numeric: tabular-nums;
+    font-weight:800; cursor:pointer; user-select:none;
+    padding:4px 10px; border-radius:10px; background:#fff; color:#173250; border:1px solid #00000010;
+  }
+  .pill{font-size:12px; padding:3px 8px; border-radius:999px; background:#fff; border:1px dashed #00000020}
+  .btn-eye{
+    all:unset; cursor:pointer; font-size:18px; line-height:1; padding:2px 6px;
+    border-radius:8px; color:#173250; background:#ffffffcc; border:1px solid #00000015;
+  }
+  .btn-eye:hover{background:#fff}
+
+  .container{max-width:1160px; margin:24px auto; padding:0 16px 60px}
+  section{
+    background: var(--card);
+    border:1px solid #00000010;
+    border-radius:16px;
+    padding:18px;
+    margin:16px 0 22px;
+    box-shadow: 0 6px 24px #00000010;
+  }
+  section h2{
+    margin:0 0 12px; font-size: clamp(18px,2.8vw,22px); color:#183a5a;
+  }
+  .center{ text-align:center }
+  .tag{display:inline-block; padding:2px 8px; border-radius:999px; background: #fff1f6; color:#9a3a62; border:1px solid #ffc5dc; font-size:12px; margin-left:6px}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns: repeat(auto-fit,minmax(240px,1fr))}
+  .g3{grid-template-columns: repeat(auto-fit,minmax(180px,1fr))}
+  label{font-weight:600; font-size:14px}
+  input[type=text], input[type=number], input[type=date], select, textarea{
+    width:100%; padding:10px 12px; border-radius:12px; border:1px solid #00000022;
+    background:#fff; font-size:14px; color:var(--ink);
+  }
+  textarea{min-height:90px; resize:vertical}
+  details{
+    background:#ffffff; border:1px solid #00000010; border-radius:12px; padding:8px 12px;
+  }
+  details summary{cursor:pointer; font-weight:800; color:#274f77; display:flex; align-items:center; gap:8px; justify-content:space-between}
+  .helper{font-size:13px; color:var(--ink-soft)}
+  .hl{background:linear-gradient(90deg,#fff3f7,#f3f9ff); padding:12px; border-radius:12px; border:1px dashed #00000020}
+  .muted{opacity:.7}
+  .mini{font-size:12px}
+
+  .chips{display:flex; flex-wrap:wrap; gap:8px}
+  .chip{
+    padding:6px 10px; border-radius:999px; background:#fff; border:1px solid #00000015; font-size:13px;
+  }
+  .list{display:grid; gap:10px}
+  .drag-list{list-style:none; padding:0; margin:0; display:grid; gap:8px}
+  .drag-item{
+    background:#fff; border:1px solid #00000018; border-radius:12px; padding:10px 12px;
+    display:flex; align-items:center; gap:10px
+  }
+  .drag{cursor:grab; user-select:none; font-size:18px}
+  .ghost{opacity:.4}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto}
+  .table th, .table td{padding:10px 12px; border-bottom:1px solid #00000010; text-align:left}
+  .table th{background:#f8fbff; position:sticky; top:0}
+  .table .num{width:60px}
+
+  .card{background:#fff; border:1px solid #00000012; border-radius:14px; padding:12px}
+  .routine-head{display:flex; gap:10px; align-items:center; justify-content:space-between}
+  .routine-title{font-weight:800}
+  .small{font-size:12px; opacity:.75}
+
+  .qguide{
+    display:inline-block;
+    font-size:12px;
+    line-height:1.35;
+    background:linear-gradient(90deg,#fff3f7,#f3f9ff);
+    border:1px dashed #00000020;
+    border-radius:10px;
+    padding:6px 10px;
+    margin:6px 0 8px;
+  }
+  .qguide strong{font-size:13px}
+  .qguide ul{margin:4px 0 0 18px; padding:0}
+
+  @media print{
+    header, .no-print, .timer-wrap, .overlay{ display:none !important; }
+    section{ box-shadow:none; background:#fff; border:none; page-break-inside:avoid; }
+    h2{ break-after:avoid-page; }
+  }
+
+  footer{padding:24px 16px 60px; text-align:center; color:#5a6b80}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="img/logo.svg" alt="Fundación APASCOVI" class="logo" onerror="this.onerror=null; this.src='img/logo.png'">
+    <div>
+      <h1>Entrevista Basada en Rutinas — Fundación APASCOVI (CAT)</h1>
+      <small>Aplicación de apoyo para profesionales de Atención Temprana</small>
+    </div>
+  </div>
+
+  <div class="timer-wrap no-print" id="timerBox">
+    <span class="pill">Pulsa el reloj para iniciar/pausar</span>
+    <button class="timer" id="timer">02:00:00</button>
+    <button title="Ocultar/mostrar reloj" class="btn-eye" id="toggleTimer" aria-label="Ocultar reloj">👁️</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Datos generales -->
+  <section id="datos">
+    <h2>Datos generales</h2>
+    <div class="grid g3">
+      <div><label>Nombre del padre/madre</label><input type="text" id="dg_tutor"/></div>
+      <div><label>Nombre del niño/a</label><input type="text" id="dg_nino"/></div>
+      <div><label>Edad del niño/a (años)</label><input type="number" id="dg_edad" min="0" max="18"/></div>
+      <div><label>Fecha de la entrevista</label><input type="date" id="dg_fecha"/></div>
+      <div><label>Lugar de la entrevista</label><input type="text" id="dg_lugar"/></div>
+      <div><label>Entrevistador/a principal</label><input type="text" id="dg_entrevistador1"/></div>
+      <div><label>Entrevistador/a secundario/a</label><input type="text" id="dg_entrevistador2"/></div>
+    </div>
+  </section>
+
+  <!-- Instrucciones -->
+  <section id="instrucciones">
+    <h2>Instrucciones para la profesional <span class="tag">Desplegable</span></h2>
+
+    <details>
+      <summary>1) Introducción a la entrevista (texto sugerido)</summary>
+      <div class="hl helper" style="margin-top:10px">
+        <p><strong>“La propuesta del encuentro de hoy es repasar las actividades diarias de la familia para encontrar las necesidades reales de intervención temprana. Esta es la mejor manera de organizar nuestros pensamientos. Digan lo que quieran y callen lo que no quieran decir. Al final de la entrevista tendremos una lista con los ítems por los que empezar a trabajar. Si no terminamos hoy buscaremos otro momento para seguir la entrevista pero sería preferible intentar acabar hoy, ya que es importante comenzar con la intervención lo antes posible”</strong></p>
+        <p><strong>“Déjeme empezar preguntando quien vive en la casa con el niño”</strong></p>
+        <p class="muted mini">Texto adaptado del protocolo original de la Entrevista Basada en Rutinas. </p>
+      </div>
+    </details>
+  </section>
+
+  <!-- 2. Quién vive en casa -->
+  <section id="convivencia">
+    <h2>2) ¿Quién vive en casa con el niño/a? <span class="tag">múltiple + edades</span></h2>
+    <div class="grid g2">
+      <div>
+        <label>Selecciona miembro</label>
+        <select id="m_rel">
+          <option value="">—</option>
+          <option>Madre</option>
+          <option>Padre</option>
+          <option>Hermano/a</option>
+          <option>Abuelo/a</option>
+          <option>Tutor/a legal</option>
+          <option>Pareja de progenitor</option>
+          <option>Cuidador/a</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div>
+        <label>Edad (años)</label>
+        <select id="m_edad">
+          <option value="">—</option>
+          <script>for(let i=0;i<=100;i++){document.write(`<option>${i}</option>`)}</script>
+        </select>
+      </div>
+      <div id="m_otro_wrap" style="display:none">
+        <label>Especifica “Otro”</label>
+        <input type="text" id="m_otro" placeholder="p.ej. Tía, compañero de piso…">
+      </div>
+      <div style="display:flex; align-items:flex-end">
+        <button class="btn blue" id="addMember">➕ Añadir miembro</button>
+      </div>
+    </div>
+    <div class="chips" id="membersChips" style="margin-top:10px"></div>
+  </section>
+
+  <!-- 2.a Por qué acude -->
+  <section id="motivo">
+    <h2>2.a) ¿Por qué acude tu hijo/a al <strong>Centro de Atención Temprana de APASCOVI (CAT)</strong>?</h2>
+    <textarea id="motivoTxt" placeholder="Escribe aquí la razón tal y como la expresa la familia…"></textarea>
+  </section>
+
+  <!-- 3. Preocupaciones -->
+  <section id="preocupaciones">
+    <h2>3) Preocupaciones de la familia</h2>
+
+    <details style="margin-bottom:8px">
+      <summary>Recomendaciones para ti</summary>
+      <div class="hl helper" style="margin-top:10px">
+        <ul>
+          <li><em>Muestra</em> interés auténtico y escribe de forma somera para no interrumpir el relato.</li>
+          <li>En cualquier momento, si aparece un problema, deseo o esperanza, márcalo con un asterisco para retomarlo después.</li>
+          <li>Cuando acabes esta parte, di: “Ahora preguntaré por esas cosas que hacemos a lo largo del día”.</li>
+        </ul>
+      </div>
+    </details>
+
+    <p class="helper">Marca las que apliquen y añade las que no estén. Abajo verás un <em>Resumen de preocupaciones</em> que puedes reordenar por prioridad.</p>
+
+    <div class="grid g3">
+      <label><input type="checkbox" class="chk-pre" value="Comunicación y lenguaje"> Comunicación y lenguaje</label>
+      <label><input type="checkbox" class="chk-pre" value="Alimentación (masticación, deglución, selectividad)"> Alimentación (masticación, deglución, selectividad)</label>
+      <label><input type="checkbox" class="chk-pre" value="Sueño (conciliar y despertares)"> Sueño (conciliar y despertares)</label>
+      <label><input type="checkbox" class="chk-pre" value="Conducta/autorregulación (rabietas, frustración)"> Conducta/autorregulación (rabietas, frustración)</label>
+      <label><input type="checkbox" class="chk-pre" value="Atención y juego"> Atención y juego</label>
+      <label><input type="checkbox" class="chk-pre" value="Interacción social con iguales y adultos"> Interacción social con iguales y adultos</label>
+      <label><input type="checkbox" class="chk-pre" value="Motricidad gruesa (gateo, marcha)"> Motricidad gruesa (gateo, marcha)</label>
+      <label><input type="checkbox" class="chk-pre" value="Motricidad fina y manipulación"> Motricidad fina y manipulación</label>
+      <label><input type="checkbox" class="chk-pre" value="Autonomía en el vestido"> Autonomía en el vestido</label>
+      <label><input type="checkbox" class="chk-pre" value="Higiene y control de esfínteres"> Higiene y control de esfínteres</label>
+      <label><input type="checkbox" class="chk-pre" value="Transiciones y rutinas en casa"> Transiciones y rutinas en casa</label>
+      <label><input type="checkbox" class="chk-pre" value="Procesamiento sensorial (ruidos, texturas, olores)"> Procesamiento sensorial (ruidos, texturas, olores)</label>
+      <label><input type="checkbox" class="chk-pre" value="Seguridad y prevención de riesgos"> Seguridad y prevención de riesgos</label>
+      <label><input type="checkbox" class="chk-pre" value="Comprensión de normas e instrucciones"> Comprensión de normas e instrucciones</label>
+      <label><input type="checkbox" class="chk-pre" value="Uso de pantallas/tiempo digital"> Uso de pantallas/tiempo digital</label>
+      <label><input type="checkbox" class="chk-pre" value="Salud general y seguimiento médico"> Salud general y seguimiento médico</label>
+      <label><input type="checkbox" class="chk-pre" value="Asistencia y adaptación a escuela/aula"> Asistencia y adaptación a escuela/aula</label>
+      <label><input type="checkbox" class="chk-pre" value="Participación en comunidad/parque/actividades"> Participación en comunidad/parque/actividades</label>
+      <label><input type="checkbox" class="chk-pre" value="Vinculación/respuesta al nombre"> Vinculación/respuesta al nombre</label>
+      <label><input type="checkbox" class="chk-pre" value="Gestión del tiempo familiar y estrés"> Gestión del tiempo familiar y estrés</label>
+    </div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="card">
+        <strong>Otros (hasta 10):</strong>
+        <div id="otrosPre"></div>
+        <button class="btn pink" id="addOtro">➕ Añadir campo vacío</button>
+      </div>
+      <div class="card">
+        <strong>Resumen de preocupaciones</strong>
+        <div class="helper mini">Se construye automáticamente con las marcadas y “Otros”. Arrastra para ordenar por prioridad.</div>
+        <ul id="preResumen" class="drag-list" style="margin-top:8px"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Guía de preguntas para Entrando en las rutinas -->
+  <section id="guia-entrando">
+    <details>
+      <summary>Guía de preguntas para “Entrando en las rutinas”</summary>
+      <div class="hl helper" style="margin-top:10px">
+        <ul>
+          <li>¿Cómo empiezan el día? (que respondan lo que hacen los padres; después, lo del niño)</li>
+          <li>¿Qué hace cada uno? Si el niño está levantado, que describan lo que hace. Después, valora del 1 al 5 ese inicio de día.</li>
+          <li>¿Qué ocurre luego? (pregunta de transición)</li>
+          <li>Ahora retrocedemos al momento en que el niño se levanta: ¿qué hace cada miembro de la familia? ¿y el niño?</li>
+          <li>Participación, independencia e interacción/comunicación del niño en esa rutina.</li>
+          <li>Escala 1–5: ¿cómo se sienten en ese momento del día?</li>
+          <li>Repite para cada rutina que trabajes (puedes saltar a “preparación de la comida” si te ayuda a avanzar).</li>
+        </ul>
+        <p class="muted mini">Guiones y escalas basados en el protocolo EBR.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ENTRANDO EN LAS RUTINAS -->
+  <section id="rutinas">
+    <h2>Entrando en las rutinas <span class="tag">rutas tipo + añadir</span></h2>
+    <p class="helper">Crea tantas rutinas como necesites. Cada tarjeta incluye preguntas guía y cajas para respuestas múltiples. Puedes valorar cada rutina (1=terrible a 5=fantástica) y cómo se siente la familia en ese momento.</p>
+
+    <div id="rutinasWrap" class="list"></div>
+    <button class="btn blue no-print" id="addRutina">➕ Añadir rutina</button>
+  </section>
+
+  <!-- Tras rutinas -->
+  <section id="otras">
+    <h2>Después de revisar las rutinas</h2>
+    <div class="grid g2">
+      <div>
+        <label>¿Hay otra rutina diaria o actividad que debamos discutir? (si hay tiempo, fines de semana)</label>
+        <textarea id="otraRutina"></textarea>
+      </div>
+      <div>
+        <label>Cuando se despierta por la noche, ¿cuáles son tus preocupaciones?</label>
+        <textarea id="preNocturnas"></textarea>
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <label>¿Hay algo que quisieras cambiar en tu vida? ¿Qué?</label>
+      <textarea id="cambiar"></textarea>
+    </div>
+  </section>
+
+  <!-- 16. Repaso de OBJETIVOS FUNCIONALES -->
+  <section id="repasoObj">
+    <h2>16) Repasemos los objetivos funcionales anotados</h2>
+    <div class="hl helper" style="margin:8px 0 12px">
+      <strong>Recordatorio:</strong> aquí aparecen los objetivos funcionales establecidos en el apartado <em>Entrando en las rutinas</em>. Puedes añadir nuevos si surgen ahora.
+    </div>
+    <div class="grid g2">
+      <div>
+        <label>Borrador de listado objetivos funcionales</label>
+        <div class="card" id="objBorradorList" style="min-height:60px"></div>
+      </div>
+      <div>
+        <label>Añadir (si surge alguno nuevo)</label>
+        <div class="grid g2">
+          <input type="text" id="nuevoObj" placeholder="Escribe un nuevo objetivo funcional…">
+          <button class="btn" id="addNuevoObj">➕ Añadir a la lista</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 Selección y orden de OBJETIVOS FUNCIONALES -->
+  <section id="prioridades">
+    <h2>17) Selección y ordenación de objetivos funcionales</h2>
+
+    <div class="hl helper" style="margin:6px 0 12px">
+      <strong>Ayuda rápida:</strong> Selecciona un objetivo del desplegable para construir la lista; luego podrás reordenar con flechas o arrastrando.
+    </div>
+
+    <div class="grid g2">
+      <div>
+        <label>Elige un objetivo funcional</label>
+        <div class="grid g2">
+          <select id="selObj"></select>
+          <button class="btn ok" id="addPrio">➕ Añadir</button>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:14px">Lista de objetivos funcionales (borrador) (máx. 10)</h3>
+    <ul id="prioList" class="drag-list"></ul>
+  </section>
+
+  <!-- 18 Reformulación SMART -->
+  <section id="smartSec">
+    <h2>18) Reformulación a objetivos SMART</h2>
+
+    <details style="margin:6px 0 10px">
+      <summary>¿Cómo redactar objetivos SMART?</summary>
+      <div class="hl helper">
+        <ul>
+          <li><strong>Específico:</strong> ¿Qué hará el niño/a, en qué rutina y con quién?</li>
+          <li><strong>Medible:</strong> ¿Cómo sabremos que lo logra? (frecuencia, duración o criterio observable)</li>
+          <li><strong>Alcanzable:</strong> Ajustado a habilidades y apoyos actuales de la familia.</li>
+          <li><strong>Relevante:</strong> Aporta valor funcional en la vida diaria de la familia.</li>
+          <li><strong>Temporal:</strong> Incluye un plazo razonable (p. ej., 6–8 semanas).</li>
+        </ul>
+        <p><strong>Ejemplos:</strong></p>
+        <ul>
+          <li>Durante la <em>merienda</em>, Paula <strong>pedirá “más” con gesto o palabra</strong> en 4 de 5 oportunidades, con apoyo gestual de la madre, <strong>en 6 semanas</strong>.</li>
+          <li>En la <em>rutina de vestido</em>, Hugo <strong>insertará el brazo en la manga</strong> cuando se le ofrezca la prenda, en 4 de 5 días, <strong>en 8 semanas</strong>.</li>
+          <li>En el <em>parque</em>, Leo <strong>se turnará 3 veces</strong> en el tobogán con un igual, con modelado del adulto, 3 días por semana, <strong>en 6 semanas</strong>.</li>
+        </ul>
+      </div>
+    </details>
+
+    <div class="grid g2">
+      <div>
+        <label>Objetivos seleccionados</label>
+        <ul id="smartLeft" class="drag-list"></ul>
+      </div>
+      <div>
+        <label>Objetivos SMART <span class="mini">(Específico · Medible · Alcanzable · Relevante · Temporal)</span></label>
+        <div id="smartRight" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resultados EBR (antes "19") -->
+  <section id="finalSec">
+    <h2 class="center">Resultados EBR</h2>
+    <div id="finalCard" class="card">
+      <div class="mini muted">A medida que redactes los SMART, irán apareciendo aquí en formato “informe para la familia”.</div>
+    </div>
+  </section>
+
+  <!-- Botones de descarga -->
+  <section class="no-print" id="descargasFinal">
+    <div class="dl-wrap">
+      <button class="btn danger" id="btnPDF">📄 Descargar PDF</button>
+      <button class="btn ok" id="btnXLSX">🟢 Descargar Excel</button>
+    </div>
+  </section>
+
+  <footer>
+    <div>EBR – Herramienta interna del <strong>Centro de Atención Temprana de Fundación APASCOVI</strong>.</div>
+  </footer>
+</div>
+
+<!-- Avisos temporales -->
+<div class="overlay" id="overlay" style="display:none; position:fixed; inset:0; background:#00000033; align-items:center; justify-content:center">
+  <div class="msg" style="background:#fff; border-radius:14px; padding:16px 18px; max-width:420px; text-align:center; box-shadow:0 10px 30px #00000030">
+    <h3 id="ovTitle" style="margin:0 0 6px">Aviso de tiempo</h3>
+    <p id="ovText" style="margin:0">Quedan 30 minutos.</p>
+  </div>
+</div>
+
+<script>
+/* ========= Estado global ========= */
+const state = {
+  miembros: [],
+  preocupaciones: [],
+  rutinas: [],
+  objDesdeRutinas: [],   // objetivos enviados desde rutinas (16)
+  objBorrador: [],       // añadidos manualmente en 16
+  selObjetivos: []       // elegidos en 17 (orden + SMART)
+};
+
+/* ========= Utilidades ========= */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+function chip(label, onRemove){
+  const el = document.createElement('span');
+  el.className = 'chip';
+  el.textContent = label;
+  el.title = 'Click para eliminar';
+  el.style.cursor = 'pointer';
+  el.addEventListener('click', ()=>onRemove?.());
+  return el;
+}
+function uniquePush(arr, val){
+  if (!val) return;
+  if (!arr.includes(val)) arr.push(val);
+}
+function makeDragList(liEls, onReorder){
+  liEls.forEach((li, i)=>{
+    li.draggable = true;
+    li.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', i); li.classList.add('ghost'); });
+    li.addEventListener('dragend', ()=>li.classList.remove('ghost'));
+    li.addEventListener('dragover', e=>e.preventDefault());
+    li.addEventListener('drop', e=>{
+      e.preventDefault();
+      const from = +e.dataTransfer.getData('text/plain'); const to = i;
+      onReorder(from, to);
+    });
+  });
+}
+
+/* ========= TIMER ========= */
+const LIMIT_SEC = 2*60*60; // 2 horas
+let timerRunning = false, elapsed = 0, tInt = null;
+const warned = { '30':false, '10':false, '5':false };
+function fmt(sec){ const s=sec%60, m=Math.floor(sec/60)%60, h=Math.floor(sec/3600); return [h,m,s].map(n=>String(n).padStart(2,'0')).join(':'); }
+function beep(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type='sine'; o.frequency.value=740; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.4);
+    o.start(); o.stop(ctx.currentTime+0.42);
+    if (navigator.vibrate) navigator.vibrate([120,40,120]);
+  }catch(e){}
+}
+function tick(){
+  elapsed+=1;
+  const remain = LIMIT_SEC - elapsed;
+  $('#timer').textContent = fmt(remain>=0?remain:0);
+  if (remain<=0){
+    clearInterval(tInt); timerRunning=false;
+    beep(); showOverlay('Tiempo finalizado', 'Se han cumplido las 2 horas.'); return;
+  }
+  const m = Math.ceil(remain/60);
+  if (!warned['30'] && m===30){ warned['30']=true; beep(); showOverlay('Aviso', 'Quedan 30 minutos.'); }
+  if (!warned['10'] && m===10){ warned['10']=true; beep(); showOverlay('Aviso', 'Quedan 10 minutos.'); }
+  if (!warned['5']  && m===5 ){ warned['5']=true;  beep(); showOverlay('Aviso', 'Quedan 5 minutos.'); }
+}
+function showOverlay(title, text){
+  $('#ovTitle').textContent = title; $('#ovText').textContent = text;
+  $('#overlay').style.display = 'flex';
+  setTimeout(()=>$('#overlay').style.display='none', 4500);
+}
+$('#timer').addEventListener('click', ()=>{
+  if (timerRunning){ clearInterval(tInt); timerRunning=false; }
+  else{ timerRunning=true; tInt=setInterval(tick,1000); }
+});
+$('#toggleTimer').addEventListener('click', ()=>{
+  const box = $('#timerBox');
+  if (box.style.display === 'none'){
+    box.style.display = '';
+  }else{
+    box.style.display = 'none';
+    const mini = document.createElement('button');
+    mini.className='btn-eye'; mini.textContent='⏱️'; mini.title='Mostrar reloj';
+    mini.id='miniTimerBtn'; mini.style.position='fixed'; mini.style.top='10px'; mini.style.right='10px'; mini.style.zIndex='9999';
+    mini.addEventListener('click', ()=>{ box.style.display=''; mini.remove(); });
+    document.body.appendChild(mini);
+  }
+});
+
+/* ========= 2. Convivencia ========= */
+const rel = $('#m_rel'), edad = $('#m_edad'), otroWrap = $('#m_otro_wrap'), otro = $('#m_otro');
+rel.addEventListener('change', ()=> otroWrap.style.display = (rel.value==='Otro' ? '' : 'none'));
+$('#addMember').addEventListener('click', ()=>{
+  if (!rel.value || !edad.value) return alert('Selecciona relación y edad.');
+  const label = (rel.value==='Otro' && otro.value.trim()) ? otro.value.trim() : rel.value;
+  const entry = {rel: label, edad: parseInt(edad.value,10)};
+  state.miembros.push(entry);
+  const node = chip(`${label} · ${entry.edad} años`, ()=>{
+    state.miembros = state.miembros.filter(m => !(m.rel===entry.rel && m.edad===entry.edad));
+    node.remove(); renderFinal();
+  });
+  $('#membersChips').appendChild(node);
+  if (rel.value==='Otro') otro.value='';
+  rel.value=''; edad.value='';
+  renderFinal();
+});
+
+/* ========= 3. Preocupaciones ========= */
+const otrosWrap = $('#otrosPre'); let otrosCount = 0;
+function renderOtroField(){
+  if (otrosCount>=10) return;
+  const id = 'otro_'+(++otrosCount);
+  const row = document.createElement('div');
+  row.style.display='flex'; row.style.gap='8px'; row.style.margin='6px 0';
+  row.innerHTML = `<input type="text" id="${id}" placeholder="Otra preocupación…"><button class="s">Guardar</button>`;
+  const btn = row.querySelector('button');
+  btn.addEventListener('click', ()=>{
+    const val = (row.querySelector('input').value||'').trim();
+    if (!val) return;
+    const c = chip(val, ()=>{ c.remove(); recomputePreocupaciones(); });
+    c.dataset.value = val; otrosWrap.appendChild(c);
+    row.querySelector('input').value='';
+    recomputePreocupaciones();
+  });
+  otrosWrap.appendChild(row);
+}
+$('#addOtro').addEventListener('click', renderOtroField);
+for(let i=0;i<3;i++) renderOtroField();
+
+function recomputePreocupaciones(){
+  const marcadas = $$('.chk-pre:checked').map(el=>el.value);
+  const otros = Array.from(otrosWrap.querySelectorAll('.chip')).map(c=>c.dataset.value||c.textContent);
+  const set = [...new Set([...marcadas, ...otros])];
+  const ordered = [...state.preocupaciones.filter(p=>set.includes(p)), ...set.filter(p=>!state.preocupaciones.includes(p))];
+  state.preocupaciones = ordered; renderPreResumen();
+}
+function renderPreResumen(){
+  const ul = $('#preResumen'); ul.innerHTML='';
+  state.preocupaciones.forEach((txt, i)=>{
+    const li = document.createElement('li');
+    li.className='drag-item';
+    li.innerHTML = `<span class="drag">☰</span><span style="flex:1">${txt}</span>`;
+    ul.appendChild(li);
+  });
+  makeDragList($$('#preResumen .drag-item'), (from,to)=>{
+    const item = state.preocupaciones.splice(from,1)[0];
+    state.preocupaciones.splice(to,0,item);
+    renderPreResumen();
+  });
+}
+$$('.chk-pre').forEach(chk => chk.addEventListener('change', recomputePreocupaciones));
+
+/* ========= Entrando en rutinas ========= */
+const RUTINAS_TIPO = [
+ 'Amanecer / inicio del día',
+ 'Despertar del niño/a',
+ 'Desayuno',
+ 'Vestido e higiene matutina',
+ 'Salida de casa / traslados',
+ 'Llegada al cole', // NUEVA
+ 'Llegada al CAT APASCOVI / sesiones',
+ 'Comida del mediodía',
+ 'Siesta / descanso',
+ 'Juego en casa / parque',
+ 'Merienda',
+ 'Baño',
+ 'Cena',
+ 'Preparación para dormir / cuento',
+ 'Noche y despertares',
+ 'Finde: actividades familiares'
+];
+
+function rutinaCard(data={}, collapsed=false){
+  const id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('r'+Date.now()+Math.random());
+  const det = document.createElement('details');
+  det.className='card routine-card'; if (!collapsed) det.open = true;
+  det.innerHTML = `
+    <summary class="routine-summary">
+      <span class="routine-title-inline">${data.nombre||'(Rutina sin nombre)'}</span>
+      <span class="small" style="margin-left:auto">clic para desplegar</span>
+      <button class="s del" title="Eliminar" style="margin-left:8px">🗑️</button>
+    </summary>
+
+    <div class="routine-body" style="margin-top:10px">
+      <div class="routine-head" style="margin-bottom:6px">
+        <div class="routine-title" style="flex:1">
+          <input class="nombre" type="text" value="${data.nombre||''}" placeholder="Nombre de la rutina" style="font-weight:800; border:none; outline:none; background:#0000; width:100%">
+          <div class="small">Escala global de la rutina (1=terrible · 5=fantástica):
+            <select class="escala">
+              <option value="">—</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="qguide">
+        <strong>Guía rápida:</strong>
+        <ul class="mini">
+          <li>¿Qué hace cada uno? ¿Dónde está cada miembro?</li>
+          <li>Participación del niño, independencia y cómo se comunica.</li>
+          <li>¿Algo más? ¿Qué otra cosa podría estar haciendo?</li>
+          <li>Escala 1–5: ¿cómo se sienten en ese momento?</li>
+        </ul>
+      </div>
+
+      <div class="grid g2">
+        <div><label>¿Qué hace cada uno?</label><textarea class="q_hace"></textarea></div>
+        <div><label>¿Qué hace el niño/a?</label><textarea class="q_nino"></textarea></div>
+        <div><label>Participación</label><textarea class="q_part"></textarea></div>
+        <div><label>Independencia</label><textarea class="q_indep"></textarea></div>
+        <div><label>Interacción / comunicación</label><textarea class="q_inter"></textarea></div>
+        <div><label>¿Algo más?</label><textarea class="q_extra"></textarea></div>
+        <div>
+          <label>Otra cosa que podría hacer</label>
+          <textarea class="q_otra"></textarea>
+        </div>
+        <div>
+          <label>¿Cómo se sienten (1–5)?</label>
+          <select class="q_sentir">
+            <option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          </select>
+        </div>
+
+        <!-- Objetivo funcional -->
+        <div style="grid-column: 1 / -1">
+          <label><strong>Objetivo funcional</strong></label>
+          <textarea class="q_objf" placeholder="Redacta un objetivo funcional relacionado con esta rutina…"></textarea>
+          <div style="display:flex; gap:8px; margin-top:6px">
+            <button class="s addObjBtn">➕ Añadir objetivo (local)</button>
+            <button class="btn ok sendObjBtn">🟢 Enviar al punto 16</button>
+          </div>
+          <div class="chips mini objLocalList" style="margin-top:6px"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const btnDel = det.querySelector('.del');
+  btnDel.addEventListener('click', (e)=>{ e.stopPropagation(); det.remove(); state.rutinas = state.rutinas.filter(r=>r.id!==id); });
+
+  const nombreInput = det.querySelector('.nombre'); const titleInline = det.querySelector('.routine-title-inline');
+  function toObj(){
+    return {
+      id, nombre: nombreInput.value.trim(),
+      escala: det.querySelector('.escala').value,
+      hace: det.querySelector('.q_hace').value.trim(),
+      nino: det.querySelector('.q_nino').value.trim(),
+      part: det.querySelector('.q_part').value.trim(),
+      indep: det.querySelector('.q_indep').value.trim(),
+      inter: det.querySelector('.q_inter').value.trim(),
+      extra: det.querySelector('.q_extra').value.trim(),
+      otra: det.querySelector('.q_otra').value.trim(),
+      sentir: det.querySelector('.q_sentir').value
+    }
+  }
+  det.addEventListener('input', ()=>{
+    titleInline.textContent = nombreInput.value.trim() || '(Rutina sin nombre)';
+    const obj = toObj();
+    const idx = state.rutinas.findIndex(r=>r.id===id);
+    if (idx>=0) state.rutinas[idx]=obj; else state.rutinas.push(obj);
+  });
+
+  // Objetivos funcionales (botones)
+  const objTxt = det.querySelector('.q_objf');
+  const addObjBtn = det.querySelector('.addObjBtn');
+  const sendObjBtn = det.querySelector('.sendObjBtn');
+  const localList = det.querySelector('.objLocalList');
+
+  addObjBtn.addEventListener('click', ()=>{
+    const val = (objTxt.value||'').trim();
+    if (!val) return;
+    const chipEl = chip(val, ()=>{ chipEl.remove(); /* local */ });
+    localList.appendChild(chipEl); objTxt.value='';
+  });
+
+  sendObjBtn.addEventListener('click', ()=>{
+    const val = (objTxt.value||'').trim();
+    if (!val) return alert('Escribe primero un objetivo funcional para enviar.');
+    uniquePush(state.objDesdeRutinas, val);
+    objTxt.value='';
+    refrescarBorrador16(); refrescarSelectorObjetivos();
+    alert('Objetivo enviado al apartado 16 (Borrador).');
+  });
+
+  const seed = toObj(); state.rutinas.push(seed);
+  return det;
+}
+function addRutina(nombre='', collapsed=false){
+  const card = rutinaCard({nombre}, collapsed);
+  $('#rutinasWrap').appendChild(card);
+}
+$('#addRutina').addEventListener('click', ()=>addRutina('', false));
+RUTINAS_TIPO.forEach(n=>addRutina(n, true));
+
+/* ========= Función de ELIMINACIÓN GLOBAL ========= */
+function deleteObjectiveEverywhere(text){
+  if(!text) return;
+  // 1) fuentes 16
+  state.objBorrador   = state.objBorrador.filter(x => x !== text);
+  state.objDesdeRutinas = state.objDesdeRutinas.filter(x => x !== text);
+  // 2) selección 17/SMART 18
+  state.selObjetivos = state.selObjetivos.filter(o => o.text !== text);
+  // 3) chips locales (si coincidieran exactamente)
+  $$('.objLocalList .chip').forEach(ch => { if ((ch.textContent||'').trim() === text) ch.remove(); });
+  // 4) refrescos
+  refrescarBorrador16(); refrescarSelectorObjetivos();
+  renderListaSeleccion(); renderSMART(); renderFinal();
+}
+
+/* ========= 16) Borrador de objetivos ========= */
+function allObjetivos16(){
+  return [...new Set([...(state.objDesdeRutinas||[]), ...(state.objBorrador||[])])];
+}
+function refrescarBorrador16(){
+  const box = $('#objBorradorList'); box.innerHTML='';
+  const ul = document.createElement('ul'); ul.style.margin='0'; ul.style.paddingLeft='18px';
+
+  const arr = allObjetivos16();
+  if (arr.length===0){
+    const li = document.createElement('li'); li.textContent='(vacío: envía objetivos desde las rutinas o añádelos aquí abajo)';
+    ul.appendChild(li);
+  } else {
+    arr.forEach((o)=>{
+      const li = document.createElement('li');
+      li.style.display='flex'; li.style.alignItems='center'; li.style.gap='8px';
+      const txt = document.createElement('span'); txt.textContent = o; txt.style.flex='1';
+      const del = document.createElement('button'); del.className='s'; del.title='Eliminar en todos los apartados'; del.textContent='🗑️';
+      del.addEventListener('click', ()=> deleteObjectiveEverywhere(o) );
+      li.appendChild(txt); li.appendChild(del); ul.appendChild(li);
+    });
+  }
+  box.appendChild(ul);
+}
+$('#addNuevoObj').addEventListener('click', ()=>{
+  const v = ($('#nuevoObj').value||'').trim();
+  if(!v) return;
+  uniquePush(state.objBorrador, v);
+  $('#nuevoObj').value='';
+  refrescarBorrador16(); refrescarSelectorObjetivos();
+});
+
+/* ========= 17) Selección y ordenación ========= */
+function refrescarSelectorObjetivos(){
+  const sel = $('#selObj'); const prev = sel.value;
+  const all = allObjetivos16();
+  sel.innerHTML = '<option value="">—</option>' + all.map(v=>`<option>${v}</option>`).join('');
+  if (all.includes(prev)) sel.value = prev;
+}
+function renderListaSeleccion(){
+  const ul = $('#prioList'); ul.innerHTML='';
+  state.selObjetivos.forEach((obj, i)=>{
+    const li = document.createElement('li'); li.className='drag-item';
+    li.innerHTML = `<span class="drag">☰</span><span style="flex:1">${obj.text}</span>
+      <div style="display:flex; gap:6px">
+        <button class="s" title="Subir">⬆️</button>
+        <button class="s" title="Bajar">⬇️</button>
+        <button class="s" title="Eliminar">🗑️</button>
+      </div>`;
+    const [up,down,del] = li.querySelectorAll('button');
+    up.addEventListener('click',()=>{ if(i>0){ const t=state.selObjetivos[i-1]; state.selObjetivos[i-1]=state.selObjetivos[i]; state.selObjetivos[i]=t; renderListaSeleccion(); renderSMART(); }});
+    down.addEventListener('click',()=>{ if(i<state.selObjetivos.length-1){ const t=state.selObjetivos[i+1]; state.selObjetivos[i+1]=state.selObjetivos[i]; state.selObjetivos[i]=t; renderListaSeleccion(); renderSMART(); }});
+    // 🔧 ahora el borrado es GLOBAL
+    del.addEventListener('click',()=> deleteObjectiveEverywhere(obj.text) );
+    ul.appendChild(li);
+  });
+  makeDragList($$('#prioList .drag-item'), (from,to)=>{
+    const it = state.selObjetivos.splice(from,1)[0];
+    state.selObjetivos.splice(to,0,it);
+    renderListaSeleccion(); renderSMART(); renderFinal();
+  });
+  renderSMART(); // sincroniza 18
+}
+$('#addPrio').addEventListener('click', ()=>{
+  const val = $('#selObj').value;
+  if(!val) return;
+  if (state.selObjetivos.find(o=>o.text===val)) return alert('Ese objetivo ya está en la lista.');
+  if (state.selObjetivos.length>=10) return alert('Máximo 10 objetivos.');
+  state.selObjetivos.push({text: val, smart: ''});
+  renderListaSeleccion(); renderFinal();
+});
+
+/* ========= 18) Reformulación SMART ========= */
+function renderSMART(){
+  const left = $('#smartLeft'); left.innerHTML='';
+  const right = $('#smartRight'); right.innerHTML='';
+
+  state.selObjetivos.forEach((o, i)=>{
+    const li = document.createElement('li');
+    li.className='drag-item';
+    li.innerHTML = `<span class="drag">☰</span><strong style="width:28px; text-align:right; display:inline-block">${i+1}.</strong> <span style="flex:1">${o.text}</span>
+      <div style="display:flex; gap:6px">
+        <button class="s" title="Subir">⬆️</button>
+        <button class="s" title="Bajar">⬇️</button>
+      </div>`;
+    const [up,down] = li.querySelectorAll('button');
+    up.addEventListener('click',()=>{ if(i>0){ const t=state.selObjetivos[i-1]; state.selObjetivos[i-1]=state.selObjetivos[i]; state.selObjetivos[i]=t; renderSMART(); renderListaSeleccion(); renderFinal(); }});
+    down.addEventListener('click',()=>{ if(i<state.selObjetivos.length-1){ const t=state.selObjetivos[i+1]; state.selObjetivos[i+1]=state.selObjetivos[i]; state.selObjetivos[i]=t; renderSMART(); renderListaSeleccion(); renderFinal(); }});
+    left.appendChild(li);
+
+    const wrap = document.createElement('div');
+    wrap.className='card';
+    wrap.innerHTML = `<label class="mini"><strong>${i+1}.</strong> SMART de: “${o.text}”</label>
+      <textarea placeholder="Redacta aquí el objetivo SMART (Específico · Medible · Alcanzable · Relevante · Temporal)…">${o.smart||''}</textarea>`;
+    const ta = wrap.querySelector('textarea');
+    ta.addEventListener('input', ()=>{
+      state.selObjetivos[i].smart = ta.value; renderFinal();
+    });
+    right.appendChild(wrap);
+  });
+
+  makeDragList($$('#smartLeft .drag-item'), (from,to)=>{
+    const it = state.selObjetivos.splice(from,1)[0];
+    state.selObjetivos.splice(to,0,it);
+    renderSMART(); renderListaSeleccion(); renderFinal();
+  });
+}
+
+/* ========= Resultados EBR (informe en pantalla) ========= */
+function renderFinal(){
+  const card = $('#finalCard');
+  const dg = {
+    fecha: $('#dg_fecha').value || '',
+    lugar: $('#dg_lugar').value || '',
+    entrevistador1: $('#dg_entrevistador1').value || '',
+    entrevistador2: $('#dg_entrevistador2').value || '',
+    tutor: $('#dg_tutor').value || '',
+    nino: $('#dg_nino').value || '',
+    edad: $('#dg_edad').value || ''
+  };
+  const smartList = state.selObjetivos.map(o=>o.smart?.trim()).filter(Boolean);
+
+  card.innerHTML = `
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; justify-content:center; text-align:center">
+      <img src="img/logo.svg" onerror="this.onerror=null; this.src='img/logo.png'" style="height:36px">
+      <div>
+        <div style="font-weight:800">Entrevista Basada en Rutinas — Fundación APASCOVI (CAT)</div>
+        <div class="mini muted">Fecha: ${dg.fecha||'-'} · Lugar: ${dg.lugar||'-'} · Entrevistadores: ${dg.entrevistador1||'-'}${dg.entrevistador2?(' y '+dg.entrevistador2):''}</div>
+        <div class="mini muted">Familia: ${dg.tutor||'-'} · Niño/a: ${dg.nino||'-'} (${dg.edad||'-'} años)</div>
+      </div>
+    </div>
+    <div style="font-size:18px; font-weight:800; color:#173250; margin:8px 0 4px; text-align:center">Resultados EBR</div>
+    ${smartList.length?`<ol style="font-size:16px; line-height:1.5; padding-left:20px; margin:6px auto; max-width:900px">${smartList.map(s=>`<li style="margin:6px 0">${s.replace(/\n/g,'<br>')}</li>`).join('')}</ol>`:'<div class="muted mini" style="text-align:center">(Aún no hay objetivos SMART redactados)</div>'}
+  `;
+}
+
+/* ========= Recolección ========= */
+function collectData(){
+  const objetivosSMART = state.selObjetivos.map((o,i)=>({N:i+1, Objetivo_borrador:o.text, SMART:o.smart||''}));
+  return {
+    fecha: $('#dg_fecha').value || '',
+    lugar: $('#dg_lugar').value || '',
+    entrevistador1: $('#dg_entrevistador1').value || '',
+    entrevistador2: $('#dg_entrevistador2').value || '',
+    tutor: $('#dg_tutor').value || '',
+    nino: $('#dg_nino').value || '',
+    edad_nino: $('#dg_edad').value || '',
+    miembros: state.miembros.slice(),
+    motivo: $('#motivoTxt').value || '',
+    preocupaciones: state.preocupaciones.slice(),
+    otrasRutinas: $('#otraRutina').value || '',
+    preNocturnas: $('#preNocturnas').value || '',
+    cambiar: $('#cambiar').value || '',
+    rutinas: state.rutinas.slice(),
+    objetivos_borrador: allObjetivos16(),
+    seleccion_objetivos: state.selObjetivos.map(o=>o.text),
+    objetivosSMART: objetivosSMART
+  };
+}
+
+/* ========= Exportar a PDF ========= */
+function buildReportHTML(data){
+  const base = document.baseURI;
+
+  const rutinasHTML = (data.rutinas||[]).map((r,idx)=>`
+    <div class="section">
+      <h3>${idx+1}. ${r.nombre||'(Rutina sin nombre)'} ${r.escala?`· Escala: ${r.escala}`:''}</h3>
+      <table>
+        <tr><th>¿Qué hace cada uno?</th><td>${(r.hace||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>¿Qué hace el niño/a?</th><td>${(r.nino||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>Participación</th><td>${(r.part||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>Independencia</th><td>${(r.indep||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>Interacción / comunicación</th><td>${(r.inter||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>¿Algo más?</th><td>${(r.extra||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>Otra cosa que podría hacer</th><td>${(r.otra||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>¿Cómo se sienten (1–5)?</th><td>${r.sentir||''}</td></tr>
+      </table>
+    </div>
+  `).join('');
+
+  const miembrosHTML = (data.miembros||[]).map(m=>`<li>${m.rel} — ${m.edad} años</li>`).join('');
+  const preocupacionesHTML = (data.preocupaciones||[]).map(p=>`<li>${p}</li>`).join('');
+  const objBorradorHTML = (data.seleccion_objetivos||[]).map((p,i)=>`<tr><td>${i+1}</td><td>${p}</td></tr>`).join('');
+  const objSMHTML = (data.objetivosSMART||[]).map(o=>`<tr><td>${o.N}</td><td>${o.Objetivo_borrador}</td><td>${(o.SMART||'').replace(/\n/g,'<br>')}</td></tr>`).join('');
+  const finales = data.objetivosSMART.map(o=>o.SMART).filter(s=>(s||'').trim());
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <base href="${base}">
+  <title>Informe EBR · APASCOVI</title>
+  <style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:#173250; }
+    header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    header img { height:42px; }
+    h1 { font-size:22px; margin:0; }
+    h2 { font-size:18px; border-bottom:2px solid #a3d2ff; padding-bottom:4px; margin:16px 0 8px; }
+    h3 { font-size:15px; margin:10px 0 6px; }
+    .meta { font-size:12px; color:#4a5d74; margin:2px 0 10px; }
+    .section { break-inside: avoid; margin-bottom:10px; }
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    th,td { border:1px solid #c9d8ef; padding:6px; vertical-align:top; }
+    ul { margin:6px 0 8px 18px; }
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .final-page { 
+      page-break-before: always; break-before: page; 
+      display:block; 
+      min-height: calc(297mm - 30mm); /* alto de página menos márgenes (@page) */
+    }
+    .final-title{ text-align:center; font-size:22px; border:none; margin:0 0 8px }
+    .final-header{ display:flex; align-items:center; gap:10px; justify-content:center; text-align:center; margin-bottom:6px }
+    .final-list{ font-size:16px; line-height:1.5; padding-left:20px; margin:6px auto; max-width:900px }
+  </style>
+</head>
+<body onload="setTimeout(()=>window.print(),300)">
+  <header>
+    <img src="img/logo.svg" onerror="this.onerror=null; this.src='img/logo.png'">
+    <div>
+      <h1>Entrevista Basada en Rutinas — Fundación APASCOVI (CAT)</h1>
+      <div class="meta">Fecha: ${data.fecha||'-'} · Lugar: ${data.lugar||'-'} · Entrevistadores: ${data.entrevistador1||'-'}${data.entrevistador2?(' y '+data.entrevistador2):''}</div>
+    </div>
+  </header>
+
+  <h2>Datos de la familia</h2>
+  <div class="grid2">
+    <div><strong>Progenitor/a:</strong> ${data.tutor||'-'}</div>
+    <div><strong>Niño/a:</strong> ${data.nino||'-'} (${data.edad_nino||'-'} años)</div>
+  </div>
+  <div class="section">
+    <strong>Convivencia:</strong>
+    <ul>${miembrosHTML||'<li>(sin datos)</li>'}</ul>
+  </div>
+
+  <h2>Motivo de acudir al CAT de APASCOVI</h2>
+  <div class="section">${(data.motivo||'(sin datos)').replace(/\n/g,'<br>')}</div>
+
+  <h2>Preocupaciones (ordenadas por prioridad)</h2>
+  <div class="section"><ul>${preocupacionesHTML||'<li>(sin datos)</li>'}</ul></div>
+
+  <h2>Rutinas</h2>
+  ${rutinasHTML || '<div class="section">(sin rutinas registradas)</div>'}
+
+  <h2>Selección de objetivos funcionales (borrador)</h2>
+  <div class="section">
+    <table><tr><th style="width:40px">#</th><th>Objetivo</th></tr>${objBorradorHTML || '<tr><td colspan="2">(sin selección)</td></tr>'}</table>
+  </div>
+
+  <h2>Objetivos SMART</h2>
+  <div class="section">
+    <table><tr><th style="width:40px">#</th><th>Objetivo (borrador)</th><th>Objetivo SMART</th></tr>${objSMHTML || '<tr><td colspan="3">(sin redacción SMART)</td></tr>'}</table>
+  </div>
+
+  <!-- PÁGINA FINAL (sola) -->
+  <div class="final-page">
+    <div class="final-header">
+      <img src="img/logo.svg" onerror="this.onerror=null; this.src='img/logo.png'" style="height:42px">
+      <div>
+        <div style="font-weight:800">Entrevista Basada en Rutinas — Fundación APASCOVI (CAT)</div>
+        <div class="meta">Familia: ${data.tutor||'-'} · Niño/a: ${data.nino||'-'} (${data.edad_nino||'-'} años)</div>
+      </div>
+    </div>
+    <h2 class="final-title">Resultados EBR</h2>
+    ${finales.length?('<ol class="final-list">'+finales.map(f=>`<li>${(f||'').replace(/\n/g,'<br>')}</li>`).join('')+'</ol>'):'<div class="meta" style="text-align:center">(sin objetivos finales)</div>'}
+  </div>
+</body>
+</html>
+  `;
+}
+function downloadPDF(){
+  const data = collectData();
+  const w = window.open('', '_blank');
+  w.document.open(); w.document.write(buildReportHTML(data)); w.document.close();
+}
+
+/* ========= Exportar a Excel ========= */
+function sheetFromArrayOfObjects(arr, headerOrder){
+  const ws = XLSX.utils.json_to_sheet(arr, {header: headerOrder}); return ws;
+}
+function downloadExcel(){
+  const d = collectData(); const wb = XLSX.utils.book_new();
+
+  const dg = [{ Fecha: d.fecha, Lugar: d.lugar, Entrevistador_1: d.entrevistador1, Entrevistador_2: d.entrevistador2, Progenitor: d.tutor, Nino: d.nino, Edad_nino: d.edad_nino }];
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(dg, Object.keys(dg[0])), 'Datos generales');
+
+  const conv = (d.miembros||[]).map((m,i)=>({N:i+1, Miembro:m.rel, Edad:m.edad}));
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(conv, ['N','Miembro','Edad']), 'Convivencia');
+
+  const motivo = [{Campo:'Motivo CAT APASCOVI', Valor: d.motivo}];
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(motivo, ['Campo','Valor']), 'Motivo');
+
+  const pre = (d.preocupaciones||[]).map((p,i)=>({N:i+1, Preocupacion:p}));
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(pre, ['N','Preocupacion']), 'Preocupaciones');
+
+  const rut = (d.rutinas||[]).map((r,i)=>({
+    N:i+1, Rutina:r.nombre||'', Escala:r.escala||'',
+    Hace:r.hace||'', Nino:r.nino||'',
+    Participacion:r.part||'', Independencia:r.indep||'',
+    Interaccion:r.inter||'', Algo_mas:r.extra||'',
+    Otra:r.otra||'', Sienten:r.sentir||''
+  }));
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(rut, ['N','Rutina','Escala','Hace','Nino','Participacion','Independencia','Interaccion','Algo_mas','Otra','Sienten']), 'Rutinas');
+
+  const sel = (d.seleccion_objetivos||[]).map((p,i)=>({N:i+1, Objetivo:p}));
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(sel, ['N','Objetivo']), 'Selección objetivos');
+
+  const sm = (d.objetivosSMART||[]).map(o=>({N:o.N, Objetivo_borrador:o.Objetivo_borrador, SMART:o.SMART}));
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(sm, ['N','Objetivo_borrador','SMART']), 'Objetivos SMART');
+
+  const date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `EBR_APASCOVI_${date}.xlsx`);
+}
+
+/* ========= Inicialización ========= */
+function init(){
+  renderPreResumen();
+  refrescarBorrador16();
+  refrescarSelectorObjetivos();
+  renderListaSeleccion();
+  renderSMART();
+  renderFinal();
+  ['dg_fecha','dg_lugar','dg_entrevistador1','dg_entrevistador2','dg_tutor','dg_nino','dg_edad'].forEach(id=>{
+    $('#'+id).addEventListener('input', renderFinal);
+  });
+}
+init();
+
+/* ========= Eventos de exportación ========= */
+$('#btnPDF').addEventListener('click', downloadPDF);
+$('#btnXLSX').addEventListener('click', downloadExcel);
+</script>
+</body>
+</html>
