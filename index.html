@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EBR · Fundación APASCOVI (CAT)</title>
+
+<!-- SheetJS para Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+  :root{
+    --pastel-blue:#a3d2ff;
+    --pastel-blue-2:#d5ecff;
+    --pastel-pink:#ffc9de;
+    --pastel-pink-2:#ffe6f0;
+    --ink:#2b2b2b;
+    --ink-soft:#5a5a5a;
+    --accent:#6aa9ff;
+    --ok:#2bb673;
+    --warn:#ffb400;
+    --card:#ffffffcc;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol";
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 800px at -10% -20%, var(--pastel-pink-2), transparent 60%),
+      radial-gradient(1200px 800px at 110% 0%, var(--pastel-blue-2), transparent 60%),
+      linear-gradient(180deg, #ffffff, #ffffff);
+  }
+  header{
+    position:sticky; top:0; z-index:1000;
+    background: linear-gradient(90deg, var(--pastel-pink) 0%, var(--pastel-blue) 100%);
+    color:#173250;
+    padding:14px 16px;
+    display:flex; align-items:center; gap:16px;
+    border-bottom:1px solid #ffffff88;
+    box-shadow: 0 6px 18px #00000014;
+  }
+  header h1{
+    margin:0; font-size: clamp(18px,2.6vw,24px); font-weight:800; letter-spacing:.2px;
+  }
+  header small{opacity:.85; font-weight:600}
+  .brand{display:flex; align-items:center; gap:12px}
+  .brand .logo{
+    height:40px; width:auto; object-fit:contain;
+    border-radius:8px; background:#fff;
+    box-shadow: inset 0 0 0 2px #ffffffaa, 0 2px 6px #0000001a;
+  }
+
+  /* Botones descarga (ahora al final) */
+  .dl-wrap{display:flex; gap:8px; margin-left:auto}
+  .btn{
+    all:unset; display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+    padding:10px 14px; border-radius:12px; font-weight:700; border:1px solid #00000018; background:#fff;
+  }
+  .btn:hover{box-shadow:0 4px 16px #00000010}
+  .btn.ok{background:linear-gradient(180deg,#eafff5,#ffffff); border-color:#2bb67344; color:#11623f}
+  .btn.warn{background:linear-gradient(180deg,#fff7e3,#ffffff); border-color:#ffb40044; color:#8b5a00}
+  .btn.pink{background:linear-gradient(180deg,#fff0f7,#ffffff); border-color:#ff87b744; color:#7b2d4b}
+  .btn.blue{background:linear-gradient(180deg,#ecf5ff,#ffffff); border-color:#6aa9ff44; color:#1b4a87}
+  .btn.danger{background:linear-gradient(180deg,#ffecec,#ffffff); border-color:#ff6b6b66; color:#8f1e1e}
+
+  /* Timer */
+  .timer-wrap{
+    display:flex; align-items:center; gap:8px;
+    background:#ffffff99; border:1px solid #ffffff; padding:6px 10px; border-radius:14px;
+    backdrop-filter: blur(4px); margin-left:auto;
+  }
+  .timer{
+    font-variant-numeric: tabular-nums;
+    font-weight:800; cursor:pointer; user-select:none;
+    padding:4px 10px; border-radius:10px; background:#fff; color:#173250; border:1px solid #00000010;
+  }
+  .pill{font-size:12px; padding:3px 8px; border-radius:999px; background:#fff; border:1px dashed #00000020}
+  .btn-eye{
+    all:unset; cursor:pointer; font-size:18px; line-height:1; padding:2px 6px;
+    border-radius:8px; color:#173250; background:#ffffffcc; border:1px solid #00000015;
+  }
+  .btn-eye:hover{background:#fff}
+
+  /* layout */
+  .container{max-width:1160px; margin:24px auto; padding:0 16px 60px}
+  section{
+    background: var(--card);
+    border:1px solid #00000010;
+    border-radius:16px;
+    padding:18px;
+    margin:16px 0 22px;
+    box-shadow: 0 6px 24px #00000010;
+  }
+  section h2{
+    margin:0 0 12px; font-size: clamp(18px,2.8vw,22px); color:#183a5a;
+  }
+  .tag{display:inline-block; padding:2px 8px; border-radius:999px; background: #fff1f6; color:#9a3a62; border:1px solid #ffc5dc; font-size:12px; margin-left:6px}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns: repeat(auto-fit,minmax(240px,1fr))}
+  .g3{grid-template-columns: repeat(auto-fit,minmax(180px,1fr))}
+  label{font-weight:600; font-size:14px}
+  input[type=text], input[type=number], input[type=date], select, textarea{
+    width:100%; padding:10px 12px; border-radius:12px; border:1px solid #00000022;
+    background:#fff; font-size:14px; color:var(--ink);
+  }
+  textarea{min-height:90px; resize:vertical}
+  details{
+    background:#ffffff; border:1px solid #00000010; border-radius:12px; padding:8px 12px;
+  }
+  details summary{cursor:pointer; font-weight:800; color:#274f77; display:flex; align-items:center; gap:8px; justify-content:space-between}
+  .helper{font-size:13px; color:var(--ink-soft)}
+  .hl{background:linear-gradient(90deg,#fff3f7,#f3f9ff); padding:12px; border-radius:12px; border:1px dashed #00000020}
+  .muted{opacity:.7}
+
+  /* chips & lists */
+  .chips{display:flex; flex-wrap:wrap; gap:8px}
+  .chip{
+    padding:6px 10px; border-radius:999px; background:#fff; border:1px solid #00000015; font-size:13px;
+  }
+  .list{display:grid; gap:10px}
+  .mini{font-size:12px}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto}
+  .table th, .table td{padding:10px 12px; border-bottom:1px solid #00000010; text-align:left}
+  .table th{background:#f8fbff; position:sticky; top:0}
+  .table .num{width:60px}
+
+  .card{background:#fff; border:1px solid #00000012; border-radius:14px; padding:12px}
+  .routine-head{display:flex; gap:10px; align-items:center; justify-content:space-between}
+  .routine-title{font-weight:800}
+  .small{font-size:12px; opacity:.75}
+
+  /* Guía rápida compacta bajo la cabecera de la rutina */
+  .qguide{
+    display:inline-block;
+    font-size:12px;
+    line-height:1.35;
+    background:linear-gradient(90deg,#fff3f7,#f3f9ff);
+    border:1px dashed #00000020;
+    border-radius:10px;
+    padding:6px 10px;
+    margin:6px 0 8px;
+  }
+  .qguide strong{font-size:13px}
+  .qguide ul{margin:4px 0 0 18px; padding:0}
+
+  /* notification overlay */
+  .overlay{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+    background: rgba(23,50,80,.25); backdrop-filter: blur(4px); z-index:2000;
+  }
+  .overlay .msg{background:#fff; border-radius:16px; padding:28px 30px; border:2px solid var(--accent);
+    box-shadow: 0 18px 60px #00000030; text-align:center; max-width:560px}
+  .overlay .msg h3{margin:0 0 8px; font-size:28px; color:#173250}
+  .overlay .msg p{margin:0; font-size:16px}
+
+  /* drag list for prioridades */
+  .prio-list{list-style:none; padding:0; margin:0; display:grid; gap:8px}
+  .prio-item{
+    background:#fff; border:1px solid #00000018; border-radius:12px; padding:10px 12px;
+    display:flex; align-items:center; gap:10px
+  }
+  .drag{cursor:grab; user-select:none; font-size:18px}
+  .prio-actions{margin-left:auto; display:flex; gap:6px}
+  .s{font-size:12px; padding:4px 8px; border-radius:8px; border:1px solid #00000020; background:#fff; cursor:pointer}
+  .s:hover{background:#f6f6f6}
+  .ghost{opacity:.4}
+
+  /* Ocultar en impresión */
+  @media print{
+    header, .no-print, .timer-wrap, .overlay{ display:none !important; }
+    section{ box-shadow:none; background:#fff; border:none; page-break-inside:avoid; }
+    h2{ break-after:avoid-page; }
+  }
+
+  /* footer */
+  footer{padding:24px 16px 60px; text-align:center; color:#5a6b80}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="img/logo.svg" alt="Fundación APASCOVI" class="logo" onerror="this.onerror=null; this.src='img/logo.png'">
+    <div>
+      <h1>Entrevista Basada en Rutinas — Fundación APASCOVI (CAT)</h1>
+      <small>Aplicación de apoyo para profesionales de Atención Temprana</small>
+    </div>
+  </div>
+
+  <div class="timer-wrap no-print" id="timerBox">
+    <span class="pill">Pulsa el reloj para iniciar/pausar</span>
+    <button class="timer" id="timer">02:00:00</button>
+    <button title="Ocultar/mostrar reloj" class="btn-eye" id="toggleTimer" aria-label="Ocultar reloj">👁️</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Datos generales -->
+  <section id="datos">
+    <h2>Datos generales</h2>
+    <div class="grid g3">
+      <div><label>Nombre del padre/madre</label><input type="text" id="dg_tutor"/></div>
+      <div><label>Nombre del niño/a</label><input type="text" id="dg_nino"/></div>
+      <div><label>Edad del niño/a (años)</label><input type="number" id="dg_edad" min="0" max="18"/></div>
+      <div><label>Fecha de la entrevista</label><input type="date" id="dg_fecha"/></div>
+      <div><label>Lugar de la entrevista</label><input type="text" id="dg_lugar"/></div>
+      <div><label>Entrevistador/a principal</label><input type="text" id="dg_entrevistador1"/></div>
+      <div><label>Entrevistador/a secundario/a</label><input type="text" id="dg_entrevistador2"/></div>
+    </div>
+  </section>
+
+  <!-- Instrucciones -->
+  <section id="instrucciones">
+    <h2>Instrucciones para la profesional <span class="tag">Desplegable</span></h2>
+
+    <details>
+      <summary>1) Introducción a la entrevista (texto sugerido)</summary>
+      <div class="hl helper" style="margin-top:10px">
+        <p><strong>“La propuesta del encuentro de hoy es repasar las actividades diarias de la familia para encontrar las necesidades reales de intervención temprana. Esta es la mejor manera de organizar nuestros pensamientos. Digan lo que quieran y callen lo que no quieran decir. Al final de la entrevista tendremos una lista con los ítems por los que empezar a trabajar. Si no terminamos hoy buscaremos otro momento para seguir la entrevista pero sería preferible intentar acabar hoy, ya que es importante comenzar con la intervención lo antes posible”</strong></p>
+        <p><strong>“Déjeme empezar preguntando quien vive en la casa con el niño”</strong></p>
+        <p class="muted mini">Texto adaptado del protocolo original de la Entrevista Basada en Rutinas. </p>
+      </div>
+    </details>
+  </section>
+
+  <!-- 2. Quién vive en casa -->
+  <section id="convivencia">
+    <h2>2) ¿Quién vive en casa con el niño/a? <span class="tag">múltiple + edades</span></h2>
+    <div class="grid g2">
+      <div>
+        <label>Selecciona miembro</label>
+        <select id="m_rel">
+          <option value="">—</option>
+          <option>Madre</option>
+          <option>Padre</option>
+          <option>Hermano/a</option>
+          <option>Abuelo/a</option>
+          <option>Tutor/a legal</option>
+          <option>Pareja de progenitor</option>
+          <option>Cuidador/a</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div>
+        <label>Edad (años)</label>
+        <select id="m_edad">
+          <option value="">—</option>
+          <script>for(let i=0;i<=100;i++){document.write(`<option>${i}</option>`)}</script>
+        </select>
+      </div>
+      <div id="m_otro_wrap" style="display:none">
+        <label>Especifica “Otro”</label>
+        <input type="text" id="m_otro" placeholder="p.ej. Tía, compañero de piso…">
+      </div>
+      <div style="display:flex; align-items:flex-end">
+        <button class="btn blue" id="addMember">➕ Añadir miembro</button>
+      </div>
+    </div>
+    <div class="chips" id="membersChips" style="margin-top:10px"></div>
+  </section>
+
+  <!-- 2.a Por qué acude -->
+  <section id="motivo">
+    <h2>2.a) ¿Por qué acude tu hijo/a al <strong>Centro de Atención Temprana de APASCOVI (CAT)</strong>?</h2>
+    <textarea id="motivoTxt" placeholder="Escribe aquí la razón tal y como la expresa la familia…"></textarea>
+  </section>
+
+  <!-- 3. Preocupaciones -->
+  <section id="preocupaciones">
+    <h2>3) Preocupaciones de la familia</h2>
+
+    <!-- Recomendaciones desplegable bajo el epígrafe -->
+    <details style="margin-bottom:8px">
+      <summary>Recomendaciones para ti</summary>
+      <div class="hl helper" style="margin-top:10px">
+        <ul>
+          <li><em>Muestra</em> interés auténtico y escribe de forma somera para no interrumpir el relato.</li>
+          <li>En cualquier momento, si aparece un problema, deseo o esperanza, márcalo con un asterisco para retomarlo después.</li>
+          <li>Cuando acabes esta parte, di: “Ahora preguntaré por esas cosas que hacemos a lo largo del día”.</li>
+        </ul>
+      </div>
+    </details>
+
+    <p class="helper">Marca las que apliquen y añade las que no estén. <em>Cuando pulses “Volcar a listado (guardar)” se guardarán para usarlas más adelante (Listado capturado y selección de prioridades).</em></p>
+
+    <div class="grid g3">
+      <!-- 20 genéricas -->
+      <label><input type="checkbox" class="chk-pre" value="Comunicación y lenguaje"> Comunicación y lenguaje</label>
+      <label><input type="checkbox" class="chk-pre" value="Alimentación (masticación, deglución, selectividad)"> Alimentación (masticación, deglución, selectividad)</label>
+      <label><input type="checkbox" class="chk-pre" value="Sueño (conciliar y despertares)"> Sueño (conciliar y despertares)</label>
+      <label><input type="checkbox" class="chk-pre" value="Conducta/autorregulación (rabietas, frustración)"> Conducta/autorregulación (rabietas, frustración)</label>
+      <label><input type="checkbox" class="chk-pre" value="Atención y juego"> Atención y juego</label>
+      <label><input type="checkbox" class="chk-pre" value="Interacción social con iguales y adultos"> Interacción social con iguales y adultos</label>
+      <label><input type="checkbox" class="chk-pre" value="Motricidad gruesa (gateo, marcha)"> Motricidad gruesa (gateo, marcha)</label>
+      <label><input type="checkbox" class="chk-pre" value="Motricidad fina y manipulación"> Motricidad fina y manipulación</label>
+      <label><input type="checkbox" class="chk-pre" value="Autonomía en el vestido"> Autonomía en el vestido</label>
+      <label><input type="checkbox" class="chk-pre" value="Higiene y control de esfínteres"> Higiene y control de esfínteres</label>
+      <label><input type="checkbox" class="chk-pre" value="Transiciones y rutinas en casa"> Transiciones y rutinas en casa</label>
+      <label><input type="checkbox" class="chk-pre" value="Procesamiento sensorial (ruidos, texturas, olores)"> Procesamiento sensorial (ruidos, texturas, olores)</label>
+      <label><input type="checkbox" class="chk-pre" value="Seguridad y prevención de riesgos"> Seguridad y prevención de riesgos</label>
+      <label><input type="checkbox" class="chk-pre" value="Comprensión de normas e instrucciones"> Comprensión de normas e instrucciones</label>
+      <label><input type="checkbox" class="chk-pre" value="Uso de pantallas/tiempo digital"> Uso de pantallas/tiempo digital</label>
+      <label><input type="checkbox" class="chk-pre" value="Salud general y seguimiento médico"> Salud general y seguimiento médico</label>
+      <label><input type="checkbox" class="chk-pre" value="Asistencia y adaptación a escuela/aula"> Asistencia y adaptación a escuela/aula</label>
+      <label><input type="checkbox" class="chk-pre" value="Participación en comunidad/parque/actividades"> Participación en comunidad/parque/actividades</label>
+      <label><input type="checkbox" class="chk-pre" value="Vinculación/respuesta al nombre"> Vinculación/respuesta al nombre</label>
+      <label><input type="checkbox" class="chk-pre" value="Gestión del tiempo familiar y estrés"> Gestión del tiempo familiar y estrés</label>
+    </div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="card">
+        <strong>Otros (hasta 10):</strong>
+        <div id="otrosPre"></div>
+        <button class="btn pink" id="addOtro">➕ Añadir campo vacío</button>
+      </div>
+      <div class="card">
+        <strong>Acciones:</strong><br>
+        <button class="btn ok" id="volcarPre">✅ Volcar a listado (guardar)</button>
+        <button class="btn warn" id="rehabilitar">♻️ Añadir nueva preocupación más tarde</button>
+        <div class="helper" id="preStatus" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Guía de preguntas para Entrando en las rutinas (orientación previa) -->
+  <section id="guia-entrando">
+    <details>
+      <summary>Guía de preguntas para “Entrando en las rutinas”</summary>
+      <div class="hl helper" style="margin-top:10px">
+        <ul>
+          <li>¿Cómo empiezan el día? (que respondan lo que hacen los padres; después, lo del niño)</li>
+          <li>¿Qué hace cada uno? Si el niño está levantado, que describan lo que hace. Después, valora del 1 al 5 ese inicio de día.</li>
+          <li>¿Qué ocurre luego? (pregunta de transición)</li>
+          <li>Ahora retrocedemos al momento en que el niño se levanta: ¿qué hace cada miembro de la familia? ¿y el niño?</li>
+          <li>Participación, independencia e interacción/comunicación del niño en esa rutina.</li>
+          <li>Escala 1–5: ¿cómo se sienten en ese momento del día?</li>
+          <li>Repite para cada rutina que trabajes (puedes saltar a “preparación de la comida” si te ayuda a avanzar).</li>
+        </ul>
+        <p class="muted mini">Guiones y escalas basados en el protocolo EBR.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ENTRANDO EN RUTINAS -->
+  <section id="rutinas">
+    <h2>Entrando en las rutinas <span class="tag">rutas tipo + añadir</span></h2>
+    <p class="helper">Crea tantas rutinas como necesites. Cada tarjeta incluye preguntas guía y cajas para respuestas múltiples. Puedes valorar cada rutina (1=terrible a 5=fantástica) y cómo se siente la familia en ese momento.</p>
+
+    <div id="rutinasWrap" class="list"></div>
+    <button class="btn blue no-print" id="addRutina">➕ Añadir rutina</button>
+  </section>
+
+  <!-- Tras rutinas / otras preguntas -->
+  <section id="otras">
+    <h2>Después de revisar las rutinas</h2>
+    <div class="grid g2">
+      <div>
+        <label>¿Hay otra rutina diaria o actividad que debamos discutir? (si hay tiempo, fines de semana)</label>
+        <textarea id="otraRutina"></textarea>
+      </div>
+      <div>
+        <label>Cuando se despierta por la noche, ¿cuáles son tus preocupaciones?</label>
+        <textarea id="preNocturnas"></textarea>
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <label>¿Hay algo que quisieras cambiar en tu vida? ¿Qué?</label>
+      <textarea id="cambiar"></textarea>
+    </div>
+  </section>
+
+  <!-- 16. Recordatorio de preocupaciones -->
+  <section id="repasoPre">
+    <h2>16) Repasemos las preocupaciones anotadas</h2>
+    <div class="hl helper" style="margin:8px 0 12px">
+      <strong>Recordatorio:</strong> aquí aparecen las preocupaciones marcadas o añadidas en el punto 3. Puedes añadir nuevas si surgen ahora.
+    </div>
+    <div class="grid g2">
+      <div>
+        <label>Listado capturado</label>
+        <div class="card" id="preList" style="min-height:60px"></div>
+      </div>
+      <div>
+        <label>Añadir (si surge alguna nueva)</label>
+        <div class="grid g2">
+          <input type="text" id="nuevaPre" placeholder="Escribe nueva preocupación…">
+          <button class="btn" id="addNuevaPre">➕ Añadir a la lista</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 Selección y orden de prioridades -->
+  <section id="prioridades">
+    <h2>17) Selección de resultados y orden por prioridad</h2>
+
+    <!-- Consejo desplegable (sin lista) -->
+    <details style="margin:6px 0 12px">
+      <summary>Consejo</summary>
+      <div class="hl helper">
+        <p class="muted">Cuando una familia mencione una habilidad muy general (p.ej., “que hable”), pregunta en qué momentos del día sería útil. Si se piden servicios (“fisioterapia”), pregunta por la habilidad concreta y el tiempo que esperan dedicar.</p>
+      </div>
+    </details>
+
+    <div class="grid g2">
+      <div>
+        <label>Elige un ítem para añadir a “Prioridades”</label>
+        <div class="grid g2">
+          <select id="selItem"></select>
+          <button class="btn ok" id="addPrio">➕ Añadir</button>
+        </div>
+      </div>
+      <div>
+        <label class="muted">Ayuda rápida:</label>
+        <div class="hl helper">Selecciona un ítem del desplegable para construir la lista; luego podrás reordenar con flechas o arrastrando.</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:14px">Lista de prioridades (máx. 10)</h3>
+    <ul id="prioList" class="prio-list"></ul>
+  </section>
+
+  <!-- 18 Cosas a trabajar -->
+  <section id="cosas">
+    <h2>18) Cosas a trabajar</h2>
+    <p class="helper">Se rellenan automáticamente con la lista ordenada de prioridades. Puedes reordenar aquí también con flechas (subir/bajar) y completar un objetivo asociado a cada prioridad.</p>
+    <div style="overflow:auto">
+      <table class="table" id="cosasTable">
+        <thead>
+          <tr><th class="num">#</th><th>Por orden de prioridad</th><th>Objetivo</th><th>Orden</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Botones de descarga al final -->
+  <section class="no-print" id="descargasFinal">
+    <div class="dl-wrap">
+      <button class="btn danger" id="btnPDF">📄 Descargar PDF</button>
+      <button class="btn ok" id="btnXLSX">🟢 Descargar Excel</button>
+    </div>
+  </section>
+
+  <footer>
+    <div>EBR – Herramienta interna del <strong>Centro de Atención Temprana de Fundación APASCOVI</strong>.</div>
+  </footer>
+</div>
+
+<!-- Avisos temporales -->
+<div class="overlay" id="overlay">
+  <div class="msg">
+    <h3 id="ovTitle">Aviso de tiempo</h3>
+    <p id="ovText">Quedan 30 minutos.</p>
+  </div>
+</div>
+
+<script>
+/* ========= Estado global ========= */
+const state = {
+  miembros: [],
+  preocupaciones: [],   // (marcadas + “otros” del 3 + añadidas en el 16)
+  rutinas: [],
+  prioridades: []
+};
+
+/* ========= Utilidades ========= */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+function chip(label, onRemove){
+  const el = document.createElement('span');
+  el.className = 'chip';
+  el.textContent = label;
+  el.title = 'Click para eliminar';
+  el.style.cursor = 'pointer';
+  el.addEventListener('click', ()=>onRemove?.());
+  return el;
+}
+
+function showOverlay(title, text){
+  $('#ovTitle').textContent = title;
+  $('#ovText').textContent = text;
+  $('#overlay').style.display = 'flex';
+  setTimeout(()=>$('#overlay').style.display='none', 4500);
+}
+
+/* ========= TIMER con avisos ========= */
+const LIMIT_SEC = 2*60*60; // 2 horas
+let timerRunning = false, elapsed = 0, tInt = null;
+const warned = { '30':false, '10':false, '5':false };
+
+function fmt(sec){
+  const s = sec%60;
+  const m = Math.floor(sec/60)%60;
+  const h = Math.floor(sec/3600);
+  return [h,m,s].map(n=>String(n).padStart(2,'0')).join(':');
+}
+function beep(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type='sine'; o.frequency.value=740;
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.4);
+    o.start(); o.stop(ctx.currentTime+0.42);
+    if (navigator.vibrate) navigator.vibrate([120,40,120]);
+  }catch(e){}
+}
+function tick(){
+  elapsed+=1;
+  const remain = LIMIT_SEC - elapsed;
+  $('#timer').textContent = fmt(remain>=0?remain:0);
+  if (remain<=0){
+    clearInterval(tInt); timerRunning=false;
+    beep(); showOverlay('Tiempo finalizado', 'Se han cumplido las 2 horas.');
+    return;
+  }
+  const m = Math.ceil(remain/60);
+  if (!warned['30'] && m===30){ warned['30']=true; beep(); showOverlay('Aviso', 'Quedan 30 minutos.'); }
+  if (!warned['10'] && m===10){ warned['10']=true; beep(); showOverlay('Aviso', 'Quedan 10 minutos.'); }
+  if (!warned['5']  && m===5 ){ warned['5']=true;  beep(); showOverlay('Aviso', 'Quedan 5 minutos.'); }
+}
+$('#timer').addEventListener('click', ()=>{
+  if (timerRunning){ clearInterval(tInt); timerRunning=false; }
+  else{ timerRunning=true; tInt=setInterval(tick,1000); }
+});
+$('#toggleTimer').addEventListener('click', ()=>{
+  const box = $('#timerBox');
+  if (box.style.display === 'none'){
+    box.style.display = '';
+  }else{
+    box.style.display = 'none';
+    // botón flotante para volver a abrir
+    const mini = document.createElement('button');
+    mini.className='btn-eye'; mini.textContent='⏱️'; mini.title='Mostrar reloj';
+    mini.id='miniTimerBtn'; mini.style.position='fixed'; mini.style.top='10px'; mini.style.right='10px'; mini.style.zIndex='9999';
+    mini.addEventListener('click', ()=>{ box.style.display=''; mini.remove(); });
+    document.body.appendChild(mini);
+  }
+});
+
+/* ========= 2. Convivencia ========= */
+const rel = $('#m_rel'), edad = $('#m_edad'), otroWrap = $('#m_otro_wrap'), otro = $('#m_otro');
+rel.addEventListener('change', ()=> otroWrap.style.display = (rel.value==='Otro' ? '' : 'none'));
+$('#addMember').addEventListener('click', ()=>{
+  if (!rel.value || !edad.value) return alert('Selecciona relación y edad.');
+  const label = (rel.value==='Otro' && otro.value.trim()) ? otro.value.trim() : rel.value;
+  const entry = {rel: label, edad: parseInt(edad.value,10)};
+  state.miembros.push(entry);
+  const node = chip(`${label} · ${entry.edad} años`, ()=>{
+    state.miembros = state.miembros.filter(m => !(m.rel===entry.rel && m.edad===entry.edad));
+    node.remove();
+  });
+  $('#membersChips').appendChild(node);
+  if (rel.value==='Otro') otro.value='';
+  rel.value=''; edad.value='';
+});
+
+/* ========= 3. Preocupaciones ========= */
+const otrosWrap = $('#otrosPre');
+let otrosCount = 0;
+function renderOtroField(){
+  if (otrosCount>=10) return;
+  const id = 'otro_'+(++otrosCount);
+  const row = document.createElement('div');
+  row.style.display='flex'; row.style.gap='8px'; row.style.margin='6px 0';
+  row.innerHTML = `<input type="text" id="${id}" placeholder="Otra preocupación…"><button class="btn s">Guardar</button>`;
+  const btn = row.querySelector('button');
+  btn.addEventListener('click', ()=>{
+    const val = (row.querySelector('input').value||'').trim();
+    if (!val) return;
+    const c = chip(val, ()=>{ c.remove(); });
+    c.dataset.value = val;
+    otrosWrap.appendChild(c);
+    row.querySelector('input').value='';
+  });
+  otrosWrap.appendChild(row);
+}
+$('#addOtro').addEventListener('click', renderOtroField);
+for(let i=0;i<3;i++) renderOtroField();
+
+let preocupacionesGuardadas = false;
+function capturarPreocupaciones(){
+  const marcadas = $$('.chk-pre:checked').map(el=>el.value);
+  const otros = Array.from(otrosWrap.querySelectorAll('.chip')).map(c=>c.dataset.value||c.textContent);
+  // Unificar y deduplicar solo desde el punto 3
+  state.preocupaciones = [...new Set([...marcadas, ...otros])];
+  preocupacionesGuardadas = true;
+  $('#preStatus').textContent = `Guardadas ${state.preocupaciones.length} preocupaciones. Se han volcado al punto 16 y al selector del punto 17.`;
+  // Actualizar 16 y 17
+  refrescarRepasoPre();
+  refrescarSelectorPrioridades();
+}
+$('#volcarPre').addEventListener('click', capturarPreocupaciones);
+$('#rehabilitar').addEventListener('click', ()=>{
+  preocupacionesGuardadas=false;
+  $('#preStatus').textContent = 'Se ha reactivado la edición: añade o marca nuevas preocupaciones y vuelve a pulsar “Volcar…”.';
+});
+
+/* ========= Entrando en rutinas (colapsables) ========= */
+const RUTINAS_TIPO = [
+ 'Amanecer / inicio del día',
+ 'Despertar del niño/a',
+ 'Desayuno',
+ 'Vestido e higiene matutina',
+ 'Salida de casa / traslados',
+ 'Llegada al CAT APASCOVI / sesiones',
+ 'Comida del mediodía',
+ 'Siesta / descanso',
+ 'Juego en casa / parque',
+ 'Merienda',
+ 'Baño',
+ 'Cena',
+ 'Preparación para dormir / cuento',
+ 'Noche y despertares',
+ 'Finde: actividades familiares'
+];
+
+function rutinaCard(data={}, collapsed=false){
+  const id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('r'+Date.now()+Math.random());
+  const det = document.createElement('details');
+  det.className='card routine-card';
+  if (!collapsed) det.open = true;
+  det.innerHTML = `
+    <summary class="routine-summary">
+      <span class="routine-title-inline">${data.nombre||'(Rutina sin nombre)'}</span>
+      <span class="small" style="margin-left:auto">clic para desplegar</span>
+      <button class="s del" title="Eliminar" style="margin-left:8px">🗑️</button>
+    </summary>
+
+    <div class="routine-body" style="margin-top:10px">
+      <div class="routine-head" style="margin-bottom:6px">
+        <div class="routine-title" style="flex:1">
+          <input class="nombre" type="text" value="${data.nombre||''}" placeholder="Nombre de la rutina" style="font-weight:800; border:none; outline:none; background:#0000; width:100%">
+          <div class="small">Escala global de la rutina (1=terrible · 5=fantástica):
+            <select class="escala">
+              <option value="">—</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guía rápida compacta -->
+      <div class="qguide">
+        <strong>Guía rápida:</strong>
+        <ul class="mini">
+          <li>¿Qué hace cada uno? ¿Dónde está cada miembro?</li>
+          <li>Participación del niño, independencia y cómo se comunica.</li>
+          <li>¿Algo más? ¿Qué otra cosa podría estar haciendo?</li>
+          <li>Escala 1–5: ¿cómo se sienten en ese momento?</li>
+        </ul>
+      </div>
+
+      <!-- Campos de la rutina -->
+      <div class="grid g2">
+        <div><label>¿Qué hace cada uno?</label><textarea class="q_hace"></textarea></div>
+        <div><label>¿Qué hace el niño/a?</label><textarea class="q_nino"></textarea></div>
+        <div><label>Participación</label><textarea class="q_part"></textarea></div>
+        <div><label>Independencia</label><textarea class="q_indep"></textarea></div>
+        <div><label>Interacción / comunicación</label><textarea class="q_inter"></textarea></div>
+        <div><label>¿Algo más?</label><textarea class="q_extra"></textarea></div>
+        <div>
+          <label>Otra cosa que podría hacer</label>
+          <textarea class="q_otra"></textarea>
+        </div>
+        <div>
+          <label>¿Cómo se sienten (1–5)?</label>
+          <select class="q_sentir">
+            <option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const btnDel = det.querySelector('.del');
+  btnDel.addEventListener('click', (e)=>{ e.stopPropagation(); det.remove(); state.rutinas = state.rutinas.filter(r=>r.id!==id); });
+
+  const nombreInput = det.querySelector('.nombre');
+  const titleInline = det.querySelector('.routine-title-inline');
+
+  function toObj(){
+    return {
+      id, nombre: nombreInput.value.trim(),
+      escala: det.querySelector('.escala').value,
+      hace: det.querySelector('.q_hace').value.trim(),
+      nino: det.querySelector('.q_nino').value.trim(),
+      part: det.querySelector('.q_part').value.trim(),
+      indep: det.querySelector('.q_indep').value.trim(),
+      inter: det.querySelector('.q_inter').value.trim(),
+      extra: det.querySelector('.q_extra').value.trim(),
+      otra: det.querySelector('.q_otra').value.trim(),
+      sentir: det.querySelector('.q_sentir').value
+    }
+  }
+  det.addEventListener('input', ()=>{
+    titleInline.textContent = nombreInput.value.trim() || '(Rutina sin nombre)';
+    const obj = toObj();
+    const idx = state.rutinas.findIndex(r=>r.id===id);
+    if (idx>=0) state.rutinas[idx]=obj; else state.rutinas.push(obj);
+  });
+
+  // Semilla en el estado
+  const seed = toObj();
+  state.rutinas.push(seed);
+  return det;
+}
+
+function addRutina(nombre='', collapsed=false){
+  const card = rutinaCard({nombre}, collapsed);
+  $('#rutinasWrap').appendChild(card);
+}
+$('#addRutina').addEventListener('click', ()=>addRutina('', false));
+RUTINAS_TIPO.forEach(n=>addRutina(n, true)); // preestablecidas colapsadas
+
+/* ========= Repaso de preocupaciones (16) ========= */
+function refrescarRepasoPre(){
+  const box = $('#preList');
+  box.innerHTML='';
+  const ul = document.createElement('ul'); ul.style.margin='0'; ul.style.paddingLeft='18px';
+
+  (state.preocupaciones||[]).forEach((p, idx)=>{
+    const li = document.createElement('li');
+    li.style.display='flex'; li.style.alignItems='center'; li.style.gap='8px';
+    const txt = document.createElement('span'); txt.textContent = p;
+    const del = document.createElement('button'); del.className='s'; del.title='Eliminar esta preocupación'; del.textContent='🗑️';
+    del.addEventListener('click', ()=>{
+      state.preocupaciones.splice(idx,1);
+      refrescarRepasoPre();
+      refrescarSelectorPrioridades();
+    });
+    li.appendChild(txt); li.appendChild(del); ul.appendChild(li);
+  });
+
+  if (!state.preocupaciones || state.preocupaciones.length===0){
+    const li = document.createElement('li');
+    li.textContent = '(vacío: usa “Volcar a listado (guardar)” en el punto 3, o añade aquí abajo)';
+    ul.appendChild(li);
+  }
+
+  box.appendChild(ul);
+}
+
+$('#addNuevaPre').addEventListener('click', ()=>{
+  const v = ($('#nuevaPre').value||'').trim();
+  if(!v) return;
+  if (!state.preocupaciones.includes(v)) state.preocupaciones.push(v);
+  $('#nuevaPre').value='';
+  refrescarRepasoPre();
+  refrescarSelectorPrioridades();
+});
+
+/* ========= Selección y orden de prioridades (17) ========= */
+function refrescarSelectorPrioridades(){
+  const sel = $('#selItem');
+  const prev = sel.value;
+  // SOLO preocupaciones recogidas (punto 3) + añadidas en 16
+  const all = [...new Set(state.preocupaciones || [])].filter(Boolean);
+  sel.innerHTML = '<option value="">—</option>' + all.map(v=>`<option>${v}</option>`).join('');
+  if (all.includes(prev)) sel.value = prev;
+}
+
+function renderPrioridades(){
+  const ul = $('#prioList'); ul.innerHTML='';
+  state.prioridades.forEach((txt, i)=>{
+    const li = document.createElement('li'); li.className='prio-item'; li.draggable=true;
+    li.innerHTML = `<span class="drag">☰</span><span>${txt}</span>
+      <div class="prio-actions">
+        <button class="s" title="Subir">⬆️</button>
+        <button class="s" title="Bajar">⬇️</button>
+        <button class="s" title="Eliminar">🗑️</button>
+      </div>`;
+    const [up,down,del] = li.querySelectorAll('button');
+    up.addEventListener('click',()=>{ if(i>0){ const t=state.prioridades[i-1]; state.prioridades[i-1]=state.prioridades[i]; state.prioridades[i]=t; renderPrioridades(); }});
+    down.addEventListener('click',()=>{ if(i<state.prioridades.length-1){ const t=state.prioridades[i+1]; state.prioridades[i+1]=state.prioridades[i]; state.prioridades[i]=t; renderPrioridades(); }});
+    del.addEventListener('click',()=>{ state.prioridades.splice(i,1); renderPrioridades(); });
+
+    li.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', i); li.classList.add('ghost'); });
+    li.addEventListener('dragend', ()=>li.classList.remove('ghost'));
+    li.addEventListener('dragover', e=>e.preventDefault());
+    li.addEventListener('drop', e=>{
+      e.preventDefault(); const from = +e.dataTransfer.getData('text/plain'); const to = i;
+      const item = state.prioridades.splice(from,1)[0];
+      state.prioridades.splice(to,0,item);
+      renderPrioridades();
+    });
+
+    ul.appendChild(li);
+  });
+  // vuelca a “Cosas a trabajar”
+  const tbody = $('#cosasTable tbody'); tbody.innerHTML='';
+  state.prioridades.forEach((p, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="num">${idx+1}</td>
+      <td>${p}</td>
+      <td><input type="text" placeholder="Define aquí el objetivo…"></td>
+      <td>
+        <button class="s" title="Subir en Cosas">⬆️</button>
+        <button class="s" title="Bajar en Cosas">⬇️</button>
+      </td>`;
+    const [upC,downC] = tr.querySelectorAll('button');
+    upC.addEventListener('click',()=>{ if(idx>0){ const t=state.prioridades[idx-1]; state.prioridades[idx-1]=state.prioridades[idx]; state.prioridades[idx]=t; renderPrioridades(); }});
+    downC.addEventListener('click',()=>{ if(idx<state.prioridades.length-1){ const t=state.prioridades[idx+1]; state.prioridades[idx+1]=state.prioridades[idx]; state.prioridades[idx]=t; renderPrioridades(); }});
+    tbody.appendChild(tr);
+  });
+}
+$('#addPrio').addEventListener('click', ()=>{
+  const val = $('#selItem').value;
+  if(!val) return;
+  if (state.prioridades.includes(val)) return alert('Ese ítem ya está en la lista.');
+  if (state.prioridades.length>=10) return alert('Máximo 10 prioridades.');
+  state.prioridades.push(val);
+  renderPrioridades();
+});
+
+/* ========= Recolección de datos para exportar ========= */
+function collectData(){
+  // Si no se volcó en 3, volcamos ahora (pero respetamos lo añadido en 16 ya en state.preocupaciones)
+  if (!preocupacionesGuardadas) { capturarPreocupaciones(); }
+
+  // Cosas a trabajar (objetivos escritos)
+  const objetivos = Array.from(document.querySelectorAll('#cosasTable tbody tr')).map((tr,i)=>{
+    const prioridad = tr.children[1].textContent.trim();
+    const objetivo = tr.querySelector('input') ? tr.querySelector('input').value.trim() : '';
+    return {N:i+1, Prioridad: prioridad, Objetivo: objetivo};
+  });
+
+  return {
+    fecha: $('#dg_fecha').value || '',
+    lugar: $('#dg_lugar').value || '',
+    entrevistador1: $('#dg_entrevistador1').value || '',
+    entrevistador2: $('#dg_entrevistador2').value || '',
+    tutor: $('#dg_tutor').value || '',
+    nino: $('#dg_nino').value || '',
+    edad_nino: $('#dg_edad').value || '',
+    miembros: state.miembros.slice(),
+    motivo: $('#motivoTxt').value || '',
+    preocupaciones: state.preocupaciones.slice(),
+    otrasRutinas: $('#otraRutina').value || '',
+    preNocturnas: $('#preNocturnas').value || '',
+    cambiar: $('#cambiar').value || '',
+    rutinas: state.rutinas.slice(),
+    prioridades: state.prioridades.slice(),
+    cosas: objetivos
+  };
+}
+
+/* ========= Exportar a PDF (vista informe + print) ========= */
+function buildReportHTML(data){
+  const base = document.baseURI; // para que el logo se resuelva
+  const rutinasHTML = (data.rutinas||[]).map((r,idx)=>`
+    <div class="section">
+      <h3>${idx+1}. ${r.nombre||'(Rutina sin nombre)'} ${r.escala?`· Escala: ${r.escala}`:''}</h3>
+      <table>
+        <tr><th>¿Qué hace cada uno?</th><td>${(r.hace||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>¿Qué hace el niño/a?</th><td>${(r.nino||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>Participación</th><td>${(r.part||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>Independencia</th><td>${(r.indep||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>Interacción / comunicación</th><td>${(r.inter||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>¿Algo más?</th><td>${(r.extra||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>Otra cosa que podría hacer</th><td>${(r.otra||'').replace(/\n/g,'<br>')}</td></tr>
+        <tr><th>¿Cómo se sienten (1–5)?</th><td>${r.sentir||''}</td></tr>
+      </table>
+    </div>
+  `).join('');
+
+  const prioridadesHTML = (data.prioridades||[]).map((p,i)=>`<tr><td>${i+1}</td><td>${p}</td></tr>`).join('');
+  const cosasHTML = (data.cosas||[]).map(c=>`<tr><td>${c.N}</td><td>${c.Prioridad}</td><td>${c.Objetivo||''}</td></tr>`).join('');
+
+  const miembrosHTML = (data.miembros||[]).map(m=>`<li>${m.rel} — ${m.edad} años</li>`).join('');
+
+  const preocupacionesHTML = (data.preocupaciones||[]).map(p=>`<li>${p}</li>`).join('');
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <base href="${base}">
+  <title>Informe EBR · APASCOVI</title>
+  <style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:#173250; }
+    header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    header img { height:42px; }
+    h1 { font-size:22px; margin:0; }
+    h2 { font-size:18px; border-bottom:2px solid #a3d2ff; padding-bottom:4px; margin:16px 0 8px; }
+    h3 { font-size:15px; margin:10px 0 6px; }
+    .meta { font-size:12px; color:#4a5d74; margin:2px 0 10px; }
+    .section { break-inside: avoid; margin-bottom:10px; }
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    th,td { border:1px solid #c9d8ef; padding:6px; vertical-align:top; }
+    ul { margin:6px 0 8px 18px; }
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+  </style>
+</head>
+<body onload="setTimeout(()=>window.print(),300)">
+  <header>
+    <img src="img/logo.svg" onerror="this.onerror=null; this.src='img/logo.png'">
+    <div>
+      <h1>Entrevista Basada en Rutinas — Fundación APASCOVI (CAT)</h1>
+      <div class="meta">Fecha: ${data.fecha||'-'} · Lugar: ${data.lugar||'-'} · Entrevistadores: ${data.entrevistador1||'-'}${data.entrevistador2?(' y '+data.entrevistador2):''}</div>
+    </div>
+  </header>
+
+  <h2>Datos de la familia</h2>
+  <div class="grid2">
+    <div><strong>Progenitor/a:</strong> ${data.tutor||'-'}</div>
+    <div><strong>Niño/a:</strong> ${data.nino||'-'} (${data.edad_nino||'-'} años)</div>
+  </div>
+  <div class="section">
+    <strong>Convivencia:</strong>
+    <ul>${miembrosHTML||'<li>(sin datos)</li>'}</ul>
+  </div>
+
+  <h2>Motivo de acudir al CAT de APASCOVI</h2>
+  <div class="section">${(data.motivo||'(sin datos)').replace(/\n/g,'<br>')}</div>
+
+  <h2>Preocupaciones</h2>
+  <div class="section"><ul>${preocupacionesHTML||'<li>(sin datos)</li>'}</ul></div>
+
+  <h2>Otras observaciones</h2>
+  <div class="section">
+    <strong>Otras rutinas/actividades:</strong> ${(data.otrasRutinas||'').replace(/\n/g,'<br>')}<br>
+    <strong>Preocupaciones nocturnas:</strong> ${(data.preNocturnas||'').replace(/\n/g,'<br>')}<br>
+    <strong>Cambios deseados:</strong> ${(data.cambiar||'').replace(/\n/g,'<br>')}
+  </div>
+
+  <h2>Rutinas</h2>
+  ${rutinasHTML || '<div class="section">(sin rutinas registradas)</div>'}
+
+  <h2>Prioridades</h2>
+  <div class="section">
+    <table>
+      <tr><th style="width:40px">#</th><th>Ítem</th></tr>
+      ${prioridadesHTML || '<tr><td colspan="2">(sin prioridades)</td></tr>'}
+    </table>
+  </div>
+
+  <h2>Cosas a trabajar</h2>
+  <div class="section">
+    <table>
+      <tr><th style="width:40px">#</th><th>Prioridad</th><th>Objetivo</th></tr>
+      ${cosasHTML || '<tr><td colspan="3">(sin objetivos)</td></tr>'}
+    </table>
+  </div>
+</body>
+</html>
+  `;
+}
+
+function downloadPDF(){
+  const data = collectData();
+  const w = window.open('', '_blank');
+  w.document.open();
+  w.document.write(buildReportHTML(data));
+  w.document.close();
+}
+
+/* ========= Exportar a Excel (.xlsx) ========= */
+function sheetFromArrayOfObjects(arr, headerOrder){
+  const ws = XLSX.utils.json_to_sheet(arr, {header: headerOrder});
+  return ws;
+}
+function downloadExcel(){
+  const d = collectData();
+  const wb = XLSX.utils.book_new();
+
+  // 1) Datos generales (una fila)
+  const dg = [{
+    Fecha: d.fecha, Lugar: d.lugar,
+    Entrevistador_1: d.entrevistador1, Entrevistador_2: d.entrevistador2,
+    Progenitor: d.tutor, Nino: d.nino, Edad_nino: d.edad_nino
+  }];
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(dg, Object.keys(dg[0])), 'Datos generales');
+
+  // 2) Convivencia
+  const conv = (d.miembros||[]).map((m,i)=>({N:i+1, Miembro:m.rel, Edad:m.edad}));
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(conv, ['N','Miembro','Edad']), 'Convivencia');
+
+  // 3) Motivo
+  const motivo = [{Campo:'Motivo CAT APASCOVI', Valor: d.motivo}];
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(motivo, ['Campo','Valor']), 'Motivo');
+
+  // 4) Preocupaciones
+  const pre = (d.preocupaciones||[]).map((p,i)=>({N:i+1, Preocupacion:p}));
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(pre, ['N','Preocupacion']), 'Preocupaciones');
+
+  // 5) Rutinas
+  const rut = (d.rutinas||[]).map((r,i)=>({
+    N:i+1, Rutina:r.nombre||'', Escala:r.escala||'',
+    Hace:r.hace||'', Nino:r.nino||'',
+    Participacion:r.part||'', Independencia:r.indep||'',
+    Interaccion:r.inter||'', Algo_mas:r.extra||'',
+    Otra:r.otra||'', Sienten:r.sentir||''
+  }));
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(rut, ['N','Rutina','Escala','Hace','Nino','Participacion','Independencia','Interaccion','Algo_mas','Otra','Sienten']), 'Rutinas');
+
+  // 6) Prioridades
+  const pr = (d.prioridades||[]).map((p,i)=>({N:i+1, Prioridad:p}));
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(pr, ['N','Prioridad']), 'Prioridades');
+
+  // 7) Cosas a trabajar
+  const cosas = (d.cosas||[]).map(c=>({N:c.N, Prioridad:c.Prioridad, Objetivo:c.Objetivo}));
+  XLSX.utils.book_append_sheet(wb, sheetFromArrayOfObjects(cosas, ['N','Prioridad','Objetivo']), 'Cosas a trabajar');
+
+  const date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `EBR_APASCOVI_${date}.xlsx`);
+}
+
+/* ========= Botones de exportación (al final) ========= */
+$('#btnPDF').addEventListener('click', downloadPDF);
+$('#btnXLSX').addEventListener('click', downloadExcel);
+
+/* ========= Inicialización ========= */
+renderPrioridades();
+refrescarRepasoPre();
+refrescarSelectorPrioridades();
+</script>
+</body>
+</html>
+
